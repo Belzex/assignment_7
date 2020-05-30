@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/docs/4.0/assets/img/favicons/favicon.ico">
+
+    <title>Movie Recommendation</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/f5b2466bb2.js" crossorigin="anonymous"></script>
+
+
+    <!-- Custom styles for this template -->
+    <link href="cover.css" rel="stylesheet">
+</head>
+
+<body class="text-center" style="background:Black; color:white">
+
+<div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+    <header class="masthead mb-auto">
+        <div class="inner">
+            <h3 class="masthead-brand"></h3>
+        </div>
+    </header>
+
+    <main role="main" class="inner cover">
+        <h1 class="cover-heading">Recommendations</h1>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-1">
+                </div>
+                <div class="col-10" style="float:left">
+                     <img src="https://m.media-amazon.com/images/M/MV5BMDdmZGU3NDQtY2E5My00ZTliLWIzOTUtMTY4ZGI1YjdiNjk3XkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_SY1000_CR0,0,671,1000_AL_.jpg"
+                             style="width: 300px; height:400px">
+                    <br>
+                    <p>You previously selected: {{ selection }}</p>
+                    <p>Description</p>
+                    <p>Actors</p>
+
+                </div>
+                <div class="col-1">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-1">
+                </div>
+                <div class="col-10">
+                    SIMILAR MOVIES
+                </div>
+                <div class="col-1">
+                </div>
+            </div>
+            <!-- Algorithm 1 results -->
+            <div class="row">
+                <div class="col-1">
+                    LIST 1
+                </div>
+                {% for movie in alg1.values %}
+                <div class="col-2">
+                <img src="https://m.media-amazon.com/images/M/MV5BMDdmZGU3NDQtY2E5My00ZTliLWIzOTUtMTY4ZGI1YjdiNjk3XkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_SY1000_CR0,0,671,1000_AL_.jpg"
+                             style="width: 150px; height:200px">
+                    {{ movie }}
+                </div>
+                {% endfor %}
+                <div class="col-1">
+                </div>
+            </div>
+            <!-- Algorithm 2 results -->
+            <div class="row">
+                <div class="col-1">
+                    LIST 2
+                </div>
+                 {% for movie in alg2.values %}
+                <div class="col-2">
+                <img src="https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SY1000_CR0,0,674,1000_AL_.jpg"
+                             style="width: 150px; height:200px">
+                    {{ movie }}
+                </div>
+                {% endfor %}
+                <div class="col-1">
+                </div>
+            </div>
+            <!-- Algorithm 3 results -->
+            <div class="row">
+                <div class="col-1">
+                    LIST 3
+                </div>
+                 {% for movie in alg3.values %}
+                <div class="col-2">
+                <img src="https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_SY1000_CR0,0,674,1000_AL_.jpg"
+                             style="width: 150px; height:200px">
+                    {{ movie }}
+                </div>
+                {% endfor %}
+                <div class="col-1">
+                </div>
+            </div>
+            <!-- Algorithm 4 results -->
+            <div class="row">
+                <div class="col-1">
+                    LIST 4
+                </div>
+                 {% for movie in alg4.values %}
+                <div class="col-2">
+                <img src="https://m.media-amazon.com/images/M/MV5BOTdmNTFjNDEtNzg0My00ZjkxLTg1ZDAtZTdkMDc2ZmFiNWQ1XkEyXkFqcGdeQXVyNTAzNzgwNTg@._V1_SY1000_CR0,0,631,1000_AL_.jpg"
+                             style="width: 150px; height:200px">
+                    {{ movie }}
+                </div>
+                {% endfor %}
+                <div class="col-1">
+                </div>
+            </div>
+            <!-- Algorithm 5 results -->
+            <div class="row">
+            <div class="col-1">
+                    LIST 5
+                </div>
+                 {% for movie in alg5.values %}
+                <div class="col-2">
+                <img src="https://m.media-amazon.com/images/M/MV5BY2U1ZTU4OWItNGU2MC00MTg1LTk4NzUtYTk3ODhjYjI0MzlmXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_SY1000_CR0,0,670,1000_AL_.jpg"
+                             style="width: 150px; height:200px">
+                    {{ movie }}
+                </div>
+                {% endfor %}
+
+                </div>
+                <div class="col-1">
+                </div>
+            </div>
+
+
+    </main>
+
+    <footer class="mastfoot mt-auto">
+        <div class="inner">
+
+        </div>
+    </footer>
+</div>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+</body>
+</html>

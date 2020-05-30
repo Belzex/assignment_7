@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="/docs/4.4/assets/img/favicons/favicon.ico">
+    <title>Movie Recommendation</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://kit.fontawesome.com/f5b2466bb2.js" crossorigin="anonymous"></script>
+
+
+</head>
+
+<body class="text-center" style="background:Black; color:white">
+
+<div class="cover-container d-flex h-100 p-3 mx-auto flex-column">
+    <header class="masthead mb-auto">
+        <div class="inner">
+            <h3 class="masthead-brand"></h3>
+        </div>
+    </header>
+
+    <main role="main" class="inner cover">
+        <h1 class="cover-heading">Reference Item Selection</h1>
+        <p class="lead">Please search for and select a movie that you have watched and enjoyed at some point. In the
+            following step we show you other movies that might be interesting for you.</p>
+
+        <div class="container">
+            <div class="row">
+                <div class="col-4">
+                </div>
+                <div class="col-4">
+                    <form class="form-inline" method="post" action="">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <input type="text" class="form-control" id="inputMovie" name="movieTextField"
+                                   placeholder="Reference movie">
+                        </div>
+                        <button type="submit" style="margin-left: 5px" class="btn btn-outline-primary">Search <i
+                                class="fas fa-search"></i></button>
+                    </form>
+                </div>
+                <div class="col-4">
+                </div>
+            </div>
+        </div>
+        <div style="height: 150px"></div>
+        <div class="container">
+            {% if results %}
+                <p class="lead">Did you mean... </p>
+                <div class="row">
+                <div class="col-1"></div>
+                {% for movie in results.values %}
+                    <div class="col-2">
+                        <img src="https://m.media-amazon.com/images/M/MV5BMDdmZGU3NDQtY2E5My00ZTliLWIzOTUtMTY4ZGI1YjdiNjk3XkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_SY1000_CR0,0,671,1000_AL_.jpg"
+                             style="width: 150px; height:200px">
+                        {{ movie }}
+                        <form class="form-inline" method="post" action="recommendations.html">
+                             {% csrf_token %}
+                            <button type="submit" style="width: 100%" name="submit" value="{{ movie }}" class="btn btn-outline-success">Choose as reference <i
+                                    class="fas fa-check"></i></button>
+                        </form>
+                    </div>
+                {% endfor %}
+            {% endif %}
+            </div>
+        <div class="col-1"></div>
+        </div>
+
+
+    </main>
+
+    <footer class="mastfoot mt-auto">
+        <div class="inner">
+
+        </div>
+    </footer>
+</div>
+
+
+<!-- Bootstrap core JavaScript
+================================================== -->
+<!-- Placed at the end of the document so the pages load faster -->
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+<script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+</body>
+</html>
