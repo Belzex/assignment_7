@@ -1,41 +1,42 @@
 from sklearn.metrics.pairwise import linear_kernel
 import pandas as pd
 
-#reading the movies dataset
-movie_list = pd.read_csv("movies.csv",encoding="Latin1")
 
-genre_list = ""
-for index,row in movie_list.iterrows():
-        genre_list += row.genres + "|"
-#split the string into a list of values
-genre_list_split = genre_list.split('|')
-#de-duplicate values
-new_list = list(set(genre_list_split))
-#remove the value that is blank
-new_list.remove('')
-#Enriching the movies dataset by adding the various genres columns.
-movies_with_genres = movie_list.copy()
+def data_initialization(movieDataset):
+    #reading the movies dataset
+    movie_list = pd.read_csv(movieDataset,encoding="Latin1")
 
-for genre in new_list :
-    movies_with_genres[genre] = movies_with_genres.apply(lambda _:int(genre in _.genres), axis = 1)
+    genre_list = ""
+    for index,row in movie_list.iterrows():
+            genre_list += row.genres + "|"
+    #split the string into a list of values
+    genre_list_split = genre_list.split('|')
+    #de-duplicate values
+    new_list = list(set(genre_list_split))
+    #remove the value that is blank
+    new_list.remove('')
+    #Enriching the movies dataset by adding the various genres columns.
+    movies_with_genres = movie_list.copy()
 
+    for genre in new_list :
+        movies_with_genres[genre] = movies_with_genres.apply(lambda _:int(genre in _.genres), axis = 1)
 
-#Getting the movies list with only genres like Musical and other such columns
-movie_content_df_temp = movies_with_genres.copy()
-movie_content_df_temp.set_index('movieId')
-movie_content_df = movie_content_df_temp.drop(columns = ['movieId','title','genres'])
-movie_content_df = movie_content_df.values
-print(movie_content_df)
+    #Getting the movies list with only genres like Musical and other such columns
+    movie_content_df_temp = movies_with_genres.copy()
+    movie_content_df_temp.set_index('movieId')
+    movie_content_df = movie_content_df_temp.drop(columns = ['movieId','title','genres'])
+    movie_content_df = movie_content_df.values
+    print(movie_content_df)
 
-# Compute the cosine similarity matrix
-cosine_sim = linear_kernel(movie_content_df,movie_content_df)
-#create a series of the movie id and title
-indicies = pd.Series(movie_content_df_temp.index, movie_content_df_temp['title'])
+    # Compute the cosine similarity matrix
+    cosine_sim = linear_kernel(movie_content_df,movie_content_df)
 
-print("data loaded")
+    return cosine_sim, movie_content_df_temp
 
 #Gets the top 10 similar movies based on the content
-def get_similar_movies_based_on_content(input_movie_title) :
+def get_similar_movies_based_on_content(input_movie_title,cosine_sim ,movie_content_df_temp) :
+    #create a series of the movie id and title
+    indicies = pd.Series(movie_content_df_temp.index, movie_content_df_temp['title'])
     movie_index =indicies[input_movie_title]
     sim_scores = list(enumerate(cosine_sim[movie_index]))
     # Sort the movies based on the similarity scores
@@ -52,6 +53,7 @@ def get_similar_movies_based_on_content(input_movie_title) :
     return similar_movies
 
 if __name__ == '__main__':
+    model, movie_content =data_initialization('movies.csv')
     input_movie = 'Exorcist The (1973)'
-    recommended_movies_by_genre = get_similar_movies_based_on_content(input_movie)
+    recommended_movies_by_genre = get_similar_movies_based_on_content(input_movie,model,movie_content)
     print(recommended_movies_by_genre)

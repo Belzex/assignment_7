@@ -4,32 +4,40 @@ import sklearn
 from sklearn.decomposition import TruncatedSVD
 from sklearn.metrics.pairwise import linear_kernel
 
-df_movies = pd.read_csv("movies.csv",encoding="Latin1")
-df_ratings = pd.read_csv("ratings.csv", usecols=['userId', 'movieId', 'rating'])
+def data_initialization():
 
-#df_ratings = df_ratings[:2650000]
-combine_movie_rating = pd.merge(df_ratings, df_movies, on='movieId')
-combine_movie_rating = combine_movie_rating.dropna(axis = 0, subset = ['title'])
-movie_ratingCount = (combine_movie_rating.
-     groupby(by = ['title'])['rating'].
-     count().
-     reset_index().
-     rename(columns = {'rating': 'totalRatingCount'})
-     [['title', 'totalRatingCount']]
-    )
-rating_with_totalRatingCount = combine_movie_rating.merge(movie_ratingCount, left_on = 'title', right_on = 'title', how = 'left')
-user_rating = rating_with_totalRatingCount.drop_duplicates(['userId','title'])
-movie_user_rating_pivot = pd.pivot_table(user_rating, index = 'userId', columns = 'title', values = 'rating').fillna(0)
-#movie_user_rating_pivot = user_rating.pivot(index = 'userId', columns = 'title', values = 'rating').fillna(0)
-X = movie_user_rating_pivot.values.T
+    df_movies, df_ratings = read_files()
+    #df_ratings = df_ratings[:2650000]
+    combine_movie_rating = pd.merge(df_ratings, df_movies, on='movieId')
+    combine_movie_rating = combine_movie_rating.dropna(axis = 0, subset = ['title'])
+    movie_ratingCount = (combine_movie_rating.
+         groupby(by = ['title'])['rating'].
+         count().
+         reset_index().
+         rename(columns = {'rating': 'totalRatingCount'})
+         [['title', 'totalRatingCount']]
+        )
+    rating_with_totalRatingCount = combine_movie_rating.merge(movie_ratingCount, left_on = 'title', right_on = 'title', how = 'left')
+    user_rating = rating_with_totalRatingCount.drop_duplicates(['userId','title'])
+    movie_user_rating_pivot = pd.pivot_table(user_rating, index = 'userId', columns = 'title', values = 'rating').fillna(0)
+    X = movie_user_rating_pivot.values.T
 
-SVD = TruncatedSVD(n_components=12, random_state=17)
-matrix = SVD.fit_transform(X)
-corr = np.corrcoef(matrix)
-movie_title = movie_user_rating_pivot.columns
-movie_title_list = list(movie_title)
+    #calculating correlation matrix i.e.model
+    SVD = TruncatedSVD(n_components=12, random_state=17)
+    matrix = SVD.fit_transform(X)
+    corr = np.corrcoef(matrix)
+    movie_title = movie_user_rating_pivot.columns
+    return movie_title, corr,df_movies
 
-def get_similar_movies_based_on_content(movie_titile):
+#reading data files
+def read_files():
+    df_movies = pd.read_csv("movies.csv", encoding="Latin1")
+    df_ratings = pd.read_csv("ratings.csv", usecols=['userId', 'movieId', 'rating'])
+    return df_movies, df_ratings
+
+#get recommendations
+def get_similar_movies_based_on_content(movie_titile,movie_title,corr,df_movies):
+    movie_title_list = list(movie_title)
     movie_index = movie_title_list.index(movie_titile)
     sim_scores  = list(enumerate(corr[movie_index]))
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
@@ -40,11 +48,12 @@ def get_similar_movies_based_on_content(movie_titile):
     similar_movies =pd.DataFrame()
     similar_movies['title'] = movie_title[movie_indices]
     similar_movies['score'] = scores
-    temp_genre =pd.merge(similar_movies,df_movies, on=['title'], how='left')
+    temp_genre =pd.merge(similar_movies, df_movies, on=['title'], how='left')
     similar_movies['genre'] = temp_genre['genres']
     return  similar_movies
 
 if __name__ == '__main__':
-        input_movie = 'Exorcist The (1973)'
-        movie_recommendations = get_similar_movies_based_on_content(input_movie)
-        print(movie_recommendations)
+    movie_content, model, df_movies =data_initialization()
+    input_movie = 'Exorcist The (1973)'
+    movie_recommendations = get_similar_movies_based_on_content(input_movie,movie_content,model,df_movies)
+    print(movie_recommendations)
