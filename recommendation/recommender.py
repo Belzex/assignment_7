@@ -50,24 +50,24 @@ class Recommender:
 
     def recommendMovies(self, movieId, n=15):
         genres = self.movie_metadata[movieId]['genres']
+        languages = self.movie_metadata[movieId]['languages']
+        actors = self.movie_metadata[movieId]['actors']
+        directors = self.movie_metadata[movieId]['directors']
         movieScoresRef = list()
         movieScore = 0
-        for genre in self.movie_metadata[movieId]['genres']:
+        for genre in genres:
             movieScore = movieScore + n
         movieScoresRef.append(movieScore)
-        languages = self.movie_metadata[movieId]['languages']
         movieScore = 0
-        for language in self.movie_metadata[movieId]['languages']:
+        for language in languages:
             movieScore = movieScore + n
         movieScoresRef.append(movieScore)
-        actors = self.movie_metadata[movieId]['actors']
         movieScore = 0
-        for actor in self.movie_metadata[movieId]['actors']:
+        for actor in actors:
             movieScore = movieScore + n
         movieScoresRef.append(movieScore)
-        directors = self.movie_metadata[movieId]['directors']
         movieScore = 0
-        for director in self.movie_metadata[movieId]['directors']:
+        for director in directors:
             movieScore = movieScore + n
         movieScoresRef.append(movieScore)
 
