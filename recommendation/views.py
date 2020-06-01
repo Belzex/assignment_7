@@ -3,7 +3,7 @@ from django.shortcuts import render
 
 # Fuzzy string matching
 from fuzzywuzzy import process
-
+from recommendation import similarity_measures
 def home(request):
     if request.method == 'POST':
         print("Searching")
