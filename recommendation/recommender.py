@@ -2,6 +2,7 @@ import pandas as pd
 import json
 from recommendation import similarity_measures as sm
 from math import inf
+from recommendation import nearest_neighbors as nn
 
 MOVIE_ID = 'movieId'
 
@@ -127,3 +128,5 @@ if __name__ == "__main__":
     for val in rec.movie_metadata.items():
         print(val)
     print(rec.recommendMovies(112852))
+    n=nn.NearestNeighbors()
+    print(n.nearestNeighborRecommendation(1))
