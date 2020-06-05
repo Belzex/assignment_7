@@ -1,8 +1,6 @@
 import pandas as pd
 import json
 from recommendation import similarity_measures as sm
-from math import inf
-from recommendation import nearest_neighbors as nn
 
 MOVIE_ID = 'movieId'
 
@@ -21,6 +19,7 @@ class Recommender:
                     languages = set()
                     actors = set()
                     genres = set()
+                    keywords = set()
                     if 'imdb' in data:
                         imdb = data['imdb']
                         for director in imdb['directors']:
@@ -43,9 +42,21 @@ class Recommender:
                             actors.add(actor)
                         for genre in movielens['genres']:
                             genres.add(genre)
-                    # print(directors, languages, actors, genres)
+                    if 'tmdb' in data:
+                        tmdb = data['tmdb']
+                        for actor in tmdb['credits']['cast']:
+                            actors.add(actor['name'])
+                        for crew in tmdb['credits']['crew']:
+                            if crew['job'] == 'Director':
+                                directors.add(crew['name'])
+                        for language in tmdb['spoken_languages']:
+                            languages.add(language['name'])
+                        for genre in tmdb['genres']:
+                            genres.add(genre['name'])
+                        for keyword in tmdb['keywords']:
+                            keywords.add(keyword['name'])
                     self.movie_metadata[row[MOVIE_ID]] = {'directors': directors, 'languages': languages,
-                                                          'actors': actors, 'genres': genres}
+                                                          'actors': actors, 'genres': genres, 'keywords': keywords}
             except FileNotFoundError:
                 print('no metadata for movie ' + str(row[MOVIE_ID]))
 
@@ -54,6 +65,7 @@ class Recommender:
         languages = self.movie_metadata[movieId]['languages']
         actors = self.movie_metadata[movieId]['actors']
         directors = self.movie_metadata[movieId]['directors']
+        keywords = self.movie_metadata[movieId]['keywords']
         movieScoresRef = list()
         movieScore = 0
         for genre in genres:
@@ -71,12 +83,12 @@ class Recommender:
         for director in directors:
             movieScore = movieScore + n
         movieScoresRef.append(movieScore)
+        movieScore = 0
+        for keyword in keywords:
+            movieScore = movieScore + n
+        movieScoresRef.append(movieScore)
 
-        moviePointsManhattan = dict()
-        moviePointsEuclidean = dict()
-        moviePointsChebyshev = dict()
         moviePointsCosine = dict()
-        moviePointsJaccard = dict()
 
         for key, movie in self.movie_metadata.items():
             if key == movieId:
@@ -110,17 +122,54 @@ class Recommender:
                 else:
                     movieScore = movieScore - 1
             movieScores.append(movieScore)
-            moviePointsManhattan[key] = float(sm.minkowski_distance(movieScoresRef, movieScores, 1))
-            moviePointsEuclidean[key] = float(sm.minkowski_distance(movieScoresRef, movieScores, 2))
-            moviePointsChebyshev[key] = float(sm.minkowski_distance(movieScoresRef, movieScores, inf))
+            movieScore = 0
+            for keyword in movie['keywords']:
+                if keyword in keywords:
+                    movieScore = movieScore + n
+                else:
+                    movieScore = movieScore - 1
+            movieScores.append(movieScore)
             moviePointsCosine[key] = float(sm.cosine_similarity(movieScoresRef, movieScores))
+        list5 = sorted(moviePointsCosine, key=lambda x: moviePointsCosine[x], reverse=True)
+        return list5[:5]
+
+    def recommendMovies1(self, movieId):
+        genres = self.movie_metadata[movieId]['genres']
+        keywords = self.movie_metadata[movieId]['keywords']
+        movieScoresRef = list()
+        movieScore = 0
+        for genre in genres:
+            movieScore = movieScore + 2
+        movieScoresRef.append(movieScore)
+        movieScore = 0
+        for keyword in keywords:
+            movieScore = movieScore + 10
+        movieScoresRef.append(movieScore)
+
+
+        moviePointsJaccard = dict()
+
+        for key, movie in self.movie_metadata.items():
+            if key == movieId:
+                continue
+            movieScores = list()
+            movieScore = 0
+            for genre in movie['genres']:
+                if genre in genres:
+                    movieScore = movieScore + 2
+                else:
+                    movieScore = movieScore - 0
+            movieScores.append(movieScore)
+            movieScore = 0
+            for keyword in movie['keywords']:
+                if keyword in keywords:
+                    movieScore = movieScore + 15
+                else:
+                    movieScore = movieScore - 5
+            movieScores.append(movieScore)
             moviePointsJaccard[key] = float(sm.jaccard_similarity(movieScoresRef, movieScores))
-        list1 = sorted(moviePointsManhattan, key=lambda x: moviePointsManhattan[x], reverse=False)
-        list2 = sorted(moviePointsEuclidean, key=lambda x: moviePointsEuclidean[x], reverse=False)
-        list3 = sorted(moviePointsChebyshev, key=lambda x: moviePointsChebyshev[x], reverse=False)
-        list4 = sorted(moviePointsCosine, key=lambda x: moviePointsCosine[x], reverse=True)
         list5 = sorted(moviePointsJaccard, key=lambda x: moviePointsJaccard[x], reverse=True)
-        return list1[:5], list2[:5], list3[:5], list4[:5], list5[:5]
+        return list5[:5]
 
 
 if __name__ == "__main__":
@@ -128,5 +177,4 @@ if __name__ == "__main__":
     for val in rec.movie_metadata.items():
         print(val)
     print(rec.recommendMovies(112852))
-    n=nn.NearestNeighbors()
-    print(n.nearestNeighborRecommendation(1))
+    print(rec.recommendMovies1(112852))
