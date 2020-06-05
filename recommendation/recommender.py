@@ -1,6 +1,7 @@
 import pandas as pd
 import sklearn
 import json
+import os
 
 from math import inf
 
@@ -8,6 +9,10 @@ from recommendation import similarity_measures as sm
 from recommendation import nearest_neighbors as nn
 
 MOVIE_ID: str = 'movieId'
+USER_ID: str = 'userId'
+RATING: str = 'rating'
+TITLE: str = 'title'
+
 IMDB_COL: str = 'imdb'
 GENRES_COL: str = 'genres'
 MOVIELENS: str = 'movielens'
@@ -16,16 +21,25 @@ DIRECTORS_COL: str = 'directors'
 ACTORS_COL: str = 'actors'
 LANGUAGES_COL: str = 'languages'
 
+DATA_PATH: str = "../resources/"
+
+df_movies: pd.DataFrame = pd.read_csv(DATA_PATH + 'movies.csv', encoding="UTF-8",
+                                      dtype={MOVIE_ID: 'int32', TITLE: 'str'})
+
+df_ratings: pd.DataFrame = pd.read_csv(
+    DATA_PATH + 'ratings.csv',
+    usecols=[USER_ID, MOVIE_ID, RATING],
+    dtype={USER_ID: 'int32', MOVIE_ID: 'int32', RATING: 'float32'}
+)
+
 
 class Recommender:
-    df_movies = pd.DataFrame()
 
     def __init__(self):
-        self.df_movies = pd.read_csv("../resources/movies.csv", encoding="Latin1")
         self.movie_metadata = dict()
-        for index, row in self.df_movies.iterrows():
+        for index, row in df_movies.iterrows():
             try:
-                with open('../resources/' + str(row[MOVIE_ID]) + '.json', encoding="UTF-8") as json_file:
+                with open(DATA_PATH + str(row[MOVIE_ID]) + '.json', encoding="UTF-8") as json_file:
                     data = json.load(json_file)
                     directors = set()
                     languages = set()
@@ -34,7 +48,7 @@ class Recommender:
                     if IMDB_COL in data:
                         imdb = data[IMDB_COL]
                         Recommender.addToCollection(imdb[DIRECTORS_COL], directors)
-                        Recommender.addToCollection(imdb['originalLanguage'], languages)
+                        languages.add(imdb['originalLanguage'])
                         actor_str = imdb[ACTORS_COL]
                         actor_str = str(actor_str).replace("['Stars: ", "")
                         actor_str = str(actor_str).replace(" | See full cast and crew »']", "")
@@ -63,7 +77,7 @@ class Recommender:
         :param dest: destination collection
         :return: None
         """
-        if type(src) is not set or type(src) is not list or type(dest) is not set or type(dest) is not list:
+        if src is None or dest is None:
             return
         for elem in src:
             dest.add(elem)
@@ -145,5 +159,5 @@ if __name__ == "__main__":
     for val in rec.movie_metadata.items():
         print(val)
     print(rec.recommendMovies(2))
-    n = nn.NearestNeighbors()
-    print(n.nearestNeighborRecommendation(1))
+    # n = nn.NearestNeighbors()
+    # print(n.nearestNeighborRecommendation(1))
