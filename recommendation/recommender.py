@@ -1,5 +1,5 @@
 import pandas as pd
-import sklearn
+
 import json
 import os
 
@@ -7,6 +7,9 @@ from math import inf
 
 from recommendation import similarity_measures as sm
 from recommendation import nearest_neighbors as nn
+from recommendation import knn
+
+
 
 MOVIE_ID: str = 'movieId'
 USER_ID: str = 'userId'
@@ -24,13 +27,12 @@ LANGUAGES_COL: str = 'languages'
 DATA_PATH: str = "../resources/"
 
 df_movies: pd.DataFrame = pd.read_csv(DATA_PATH + 'movies.csv', encoding="UTF-8",
-                                      dtype={MOVIE_ID: 'int32', TITLE: 'str'})
+                                      usecols=[MOVIE_ID, TITLE, GENRES_COL],
+                                      dtype={MOVIE_ID: 'int32', TITLE: 'str', GENRES_COL: 'str'})
 
-df_ratings: pd.DataFrame = pd.read_csv(
-    DATA_PATH + 'ratings.csv',
-    usecols=[USER_ID, MOVIE_ID, RATING],
-    dtype={USER_ID: 'int32', MOVIE_ID: 'int32', RATING: 'float32'}
-)
+df_ratings: pd.DataFrame = pd.read_csv(DATA_PATH + 'ratings.csv',
+                                       usecols=[USER_ID, MOVIE_ID, RATING],
+                                       dtype={USER_ID: 'int32', MOVIE_ID: 'int32', RATING: 'float32'})
 
 
 class Recommender:
@@ -153,11 +155,14 @@ class Recommender:
         return list1[:5], list2[:5], list3[:5], list4[:5], list5[:5]
 
 
+
+
+
+
 if __name__ == "__main__":
     rec = Recommender()
+    knn = KNN()
 
-    for val in rec.movie_metadata.items():
-        print(val)
     print(rec.recommendMovies(2))
     # n = nn.NearestNeighbors()
     # print(n.nearestNeighborRecommendation(1))
