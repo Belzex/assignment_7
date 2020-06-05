@@ -47,18 +47,16 @@ RATING: str = RATING
 class KNN:
 
     def __init__(self, movie_rating_threshold: int = 0, user_rating_threshold: int = 0):
-        # self.movie_path: str = movie_path
-        # self.ratings_path: str = ratings_path
         self.movie_rating_threshold: int = movie_rating_threshold
         self.user_rating_threshold: int = user_rating_threshold
         self.model = NearestNeighbors()
 
-    def make_recommendations(self, fav_movie, n_recommendations):
+    def make_recommendations(self, movie_title: str, n_recommendations: int):
         """
         make top n movie recommendations
         Parameters
         ----------
-        fav_movie: str, name of user input movie
+        movie_title: str, name of user input movie
         n_recommendations: int, top n recommendations
         """
         # get data
@@ -66,10 +64,10 @@ class KNN:
         # get recommendations
         raw_recommends = self._inference(
             self.model, movie_user_mat_sparse, hashmap,
-            fav_movie, n_recommendations)
+            movie_title, n_recommendations)
         # print results
         reverse_hashmap = {v: k for k, v in hashmap.items()}
-        print('Recommendations for {}:'.format(fav_movie))
+        print('Recommendations for {}:'.format(movie_title))
         for i, (idx, dist) in enumerate(raw_recommends):
             print('{0}: {1}, with distance '
                   'of {2}'.format(i + 1, reverse_hashmap[idx], dist))
