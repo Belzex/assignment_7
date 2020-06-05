@@ -13,14 +13,24 @@ MOVIE_ID: str = 'movieId'
 USER_ID: str = 'userId'
 RATING: str = 'rating'
 TITLE: str = 'title'
+NAME: str = 'name'
+CAST: str = 'cast'
+CREW: str = 'crew'
+JOB: str = 'job'
+DIRECTOR: str = 'Director'
 
 IMDB_COL: str = 'imdb'
+TMDB_COL: str = 'tmdb'
 GENRES_COL: str = 'genres'
 MOVIELENS: str = 'movielens'
 
 DIRECTORS_COL: str = 'directors'
 ACTORS_COL: str = 'actors'
 LANGUAGES_COL: str = 'languages'
+KEYWORDS_COL: str = 'keywords'
+CREDITS_COL: str = 'credits'
+SPOKEN_LANGUAGES: str = 'spoken_languages'
+
 
 DATA_PATH: str = "../resources/"
 
@@ -63,21 +73,21 @@ class Recommender:
                         Recommender.addToCollection(movielensNode[LANGUAGES_COL], languages)
                         Recommender.addToCollection(movielensNode[ACTORS_COL], actors)
                         Recommender.addToCollection(movielensNode[GENRES_COL], genres)
-                    if 'tmdb' in data:
-                        tmdb = data['tmdb']
-                        for actor in tmdb['credits']['cast']:
-                            actors.add(actor['name'])
-                        for crew in tmdb['credits']['crew']:
-                            if crew['job'] == 'Director':
-                                directors.add(crew['name'])
-                        for language in tmdb['spoken_languages']:
-                            languages.add(language['name'])
-                        for genre in tmdb['genres']:
-                            genres.add(genre['name'])
-                        for keyword in tmdb['keywords']:
-                            keywords.add(keyword['name'])
+                    if TMDB_COL in data:
+                        tmdb = data[TMDB_COL]
+                        for actor in tmdb[CREDITS_COL][CAST]:
+                            actors.add(actor[NAME])
+                        for crew in tmdb[CREDITS_COL][CREW]:
+                            if crew[JOB] == DIRECTOR:
+                                directors.add(crew[NAME])
+                        for language in tmdb[SPOKEN_LANGUAGES]:
+                            languages.add(language[NAME])
+                        for genre in tmdb[GENRES_COL]:
+                            genres.add(genre[NAME])
+                        for keyword in tmdb[KEYWORDS_COL]:
+                            keywords.add(keyword[NAME])
                     self.movie_metadata[row[MOVIE_ID]] = {DIRECTORS_COL: directors, LANGUAGES_COL: languages,
-                                                          ACTORS_COL: actors, GENRES_COL: genres, 'keywords': keywords}
+                                                          ACTORS_COL: actors, GENRES_COL: genres, KEYWORDS_COL: keywords}
             except FileNotFoundError:
                 print('no metadata for movie ' + str(row[MOVIE_ID]))
 
@@ -166,33 +176,19 @@ class Recommender:
         return list1[:5], list2[:5], list3[:5], list4[:5], list5[:5]
 
 
-    def recommendMovies(self, movieId, n=15):
+    def recommendMovies1(self, movieId, n=15):
         genres = self.movie_metadata[movieId]['genres']
         languages = self.movie_metadata[movieId]['languages']
         actors = self.movie_metadata[movieId]['actors']
         directors = self.movie_metadata[movieId]['directors']
         keywords = self.movie_metadata[movieId]['keywords']
+
         movieScoresRef = list()
-        movieScore = 0
-        for genre in genres:
-            movieScore = movieScore + n
-        movieScoresRef.append(movieScore)
-        movieScore = 0
-        for language in languages:
-            movieScore = movieScore + n
-        movieScoresRef.append(movieScore)
-        movieScore = 0
-        for actor in actors:
-            movieScore = movieScore + n
-        movieScoresRef.append(movieScore)
-        movieScore = 0
-        for director in directors:
-            movieScore = movieScore + n
-        movieScoresRef.append(movieScore)
-        movieScore = 0
-        for keyword in keywords:
-            movieScore = movieScore + n
-        movieScoresRef.append(movieScore)
+        Recommender.addScoreToList(genres, n, movieScoresRef)
+        Recommender.addScoreToList(languages, n, movieScoresRef)
+        Recommender.addScoreToList(actors, n, movieScoresRef)
+        Recommender.addScoreToList(directors, n, movieScoresRef)
+        Recommender.addScoreToList(keywords, n, movieScoresRef)
 
         moviePointsCosine = dict()
 
@@ -200,58 +196,23 @@ class Recommender:
             if key == movieId:
                 continue
             movieScores = list()
-            movieScore = 0
-            for genre in movie['genres']:
-                if genre in genres:
-                    movieScore = movieScore + n
-                else:
-                    movieScore = movieScore - 1
-            movieScores.append(movieScore)
-            movieScore = 0
-            for language in movie['languages']:
-                if language in languages:
-                    movieScore = movieScore + n
-                else:
-                    movieScore = movieScore - 1
-            movieScores.append(movieScore)
-            movieScore = 0
-            for actor in movie['actors']:
-                if actor in actors:
-                    movieScore = movieScore + n
-                else:
-                    movieScore = movieScore - 1
-            movieScores.append(movieScore)
-            movieScore = 0
-            for director in movie['directors']:
-                if director in directors:
-                    movieScore = movieScore + n
-                else:
-                    movieScore = movieScore - 1
-            movieScores.append(movieScore)
-            movieScore = 0
-            for keyword in movie['keywords']:
-                if keyword in keywords:
-                    movieScore = movieScore + n
-                else:
-                    movieScore = movieScore - 1
-            movieScores.append(movieScore)
+            Recommender.matchWithBias(movie[GENRES_COL], genres, n, 1, movieScores)
+            Recommender.matchWithBias(movie[LANGUAGES_COL], languages, n, 1, movieScores)
+            Recommender.matchWithBias(movie[ACTORS_COL], actors, n, 1, movieScores)
+            Recommender.matchWithBias(movie[DIRECTORS_COL], directors, n, 1, movieScores)
+            Recommender.matchWithBias(movie[KEYWORDS_COL], keywords, n, 1, movieScores)
+
             moviePointsCosine[key] = float(sm.cosine_similarity(movieScoresRef, movieScores))
         list5 = sorted(moviePointsCosine, key=lambda x: moviePointsCosine[x], reverse=True)
         return list5[:5]
 
-    def recommendMovies1(self, movieId):
+    def recommendMovies2(self, movieId):
         genres = self.movie_metadata[movieId]['genres']
         keywords = self.movie_metadata[movieId]['keywords']
-        movieScoresRef = list()
-        movieScore = 0
-        for genre in genres:
-            movieScore = movieScore + 2
-        movieScoresRef.append(movieScore)
-        movieScore = 0
-        for keyword in keywords:
-            movieScore = movieScore + 10
-        movieScoresRef.append(movieScore)
 
+        movieScoresRef = list()
+        Recommender.addScoreToList(genres, 2, movieScoresRef)
+        Recommender.addScoreToList(keywords, 10, movieScoresRef)
 
         moviePointsJaccard = dict()
 
@@ -259,20 +220,9 @@ class Recommender:
             if key == movieId:
                 continue
             movieScores = list()
-            movieScore = 0
-            for genre in movie['genres']:
-                if genre in genres:
-                    movieScore = movieScore + 2
-                else:
-                    movieScore = movieScore - 0
-            movieScores.append(movieScore)
-            movieScore = 0
-            for keyword in movie['keywords']:
-                if keyword in keywords:
-                    movieScore = movieScore + 15
-                else:
-                    movieScore = movieScore - 5
-            movieScores.append(movieScore)
+            Recommender.matchWithBias(movie[GENRES_COL], genres, 2, 0, movieScores)
+            Recommender.matchWithBias(movie[KEYWORDS_COL], keywords, 15, 5, movieScores)
+
             moviePointsJaccard[key] = float(sm.jaccard_similarity(movieScoresRef, movieScores))
         list5 = sorted(moviePointsJaccard, key=lambda x: moviePointsJaccard[x], reverse=True)
         return list5[:5]
@@ -282,11 +232,9 @@ class Recommender:
 
 if __name__ == "__main__":
     rec = Recommender()
-    knn = KNN()
+    # knn = knn.KNN()
 
     print(rec.recommendMovies(2))
 
-    for val in rec.movie_metadata.items():
-        print(val)
-    print(rec.recommendMovies(112852))
     print(rec.recommendMovies1(112852))
+    print(rec.recommendMovies2(112852))
