@@ -51,26 +51,31 @@ class KNN:
         self.user_rating_threshold: int = user_rating_threshold
         self.model = NearestNeighbors()
 
-    def make_recommendations(self, movie_title: str, n_recommendations: int):
+    def make_recommendations(self, movie_title: str, n_recommendations: int, print_recommendations: bool = False):
         """
         make top n movie recommendations
         Parameters
         ----------
-        movie_title: str, name of user input movie
-        n_recommendations: int, top n recommendations
+        :param movie_title: str, name of user input movie
+        :param n_recommendations: int, top n recommendations
+        :param print_recommendations: if true, the recommendations get printed to the console
         """
         # get data
-        movie_user_mat_sparse, hashmap = self._prepare_data()
+        movie_user_mat_sparse, movie_dictionary = self._prepare_data()
         # get recommendations
         raw_recommends = self._inference(
-            self.model, movie_user_mat_sparse, hashmap,
+            self.model, movie_user_mat_sparse, movie_dictionary,
             movie_title, n_recommendations)
-        # print results
-        reverse_hashmap = {v: k for k, v in hashmap.items()}
-        print('Recommendations for {}:'.format(movie_title))
-        for i, (idx, dist) in enumerate(raw_recommends):
-            print('{0}: {1}, with distance '
-                  'of {2}'.format(i + 1, reverse_hashmap[idx], dist))
+
+        reverse_movie_dictionary = {v: k for k, v in movie_dictionary.items()}
+        recommendation_list: list = list()
+        for i, (movieId, dist) in enumerate(raw_recommends):
+            recommendation_list.append(reverse_movie_dictionary[movieId])
+            if print_recommendations:
+                print('{0}: {1}, with distance '
+                      'of {2}'.format(i + 1, reverse_movie_dictionary[movieId], dist))
+
+        return recommendation_list
 
     def _prepare_data(self):
         df_movies_count = pd.DataFrame(df_ratings.groupby(MOVIE_ID).size(),
@@ -112,11 +117,11 @@ class KNN:
                 return top n similar movie recommendations based on user's input movie
                 Parameters
                 ----------
-                model: sklearn model, knn model
-                data: movie-user matrix
-                movie_dictionary: dict, map movie title name to index of the movie in data
-                movie_title: str, name of user input movie
-                n_recommendations: int, top n recommendations
+                :param model: sklearn model, knn model
+                :param data: movie-user matrix
+                :param movie_dictionary: dict, map movie title name to index of the movie in data
+                :param movie_title: str, name of user input movie
+                :param n_recommendations: int, top n recommendations
                 Return
                 ------
                 list of
@@ -147,8 +152,9 @@ class KNN:
         If no match found, return None
         Parameters
         ----------
-        movie_dictionary: dict, map movie title name to index of the movie in data
-        movie: str, name of user input movie
+        :param movie_dictionary: dict, map movie title name to index of the movie in data
+        :param movie: str, name of user input movie
+        :param ratio_threshold: int threshold of fuzzywuzzy ratio
         Return
         ------
         index of the closest match
