@@ -33,8 +33,8 @@ class movie_recommendation_itemRating:
 
     #reading data files
     def read_files(self):
-        df_movies = pd.read_csv("resources/movies.csv", encoding="Latin1")
-        df_ratings = pd.read_csv("resources/ratings.csv", usecols=['userId', 'movieId', 'rating'])
+        df_movies = pd.read_csv("../resources/movies.csv", encoding="Latin1")
+        df_ratings = pd.read_csv("../resources/ratings.csv", usecols=['userId', 'movieId', 'rating'])
         return df_movies, df_ratings
 
     #get recommendations

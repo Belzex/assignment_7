@@ -53,7 +53,7 @@ class movie_recommendation_by_tags:
 
 
     def read_model_content_data(self):
-        modeldata =np.loadtxt(fname = "model.txt")
+        modeldata =np.loadtxt(fname = "../resources/model.txt")
         df = pd.read_csv('../resources/movie_content.csv', encoding="Latin1")
         return modeldata, df
 

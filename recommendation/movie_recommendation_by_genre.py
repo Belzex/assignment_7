@@ -36,8 +36,7 @@ class movie_recommendation_by_genre:
 
     #Gets the top 10 similar movies based on the content
     def get_similar_movies_based_on_genre(self, input_movie_title) :
-        input_movie_title = 'Exorcist The (1973)'
-        cosine_sim, movie_content_df_temp = self.data_initialization( 'movies.csv')
+        cosine_sim, movie_content_df_temp = self.data_initialization('resources/movies.csv')
         #create a series of the movie id and title
         indicies = pd.Series(movie_content_df_temp.index, movie_content_df_temp['title'])
         movie_index =indicies[input_movie_title]
