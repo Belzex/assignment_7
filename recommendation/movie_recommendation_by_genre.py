@@ -45,7 +45,7 @@ class movie_recommendation_by_genre:
         sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
 
         # Get the scores of the 10 most similar movies
-        sim_scores = sim_scores[0:5]
+        sim_scores = sim_scores[1:6]
 
         movie_sim_scores = [i[1] for i in sim_scores]
         # Get the movie indices

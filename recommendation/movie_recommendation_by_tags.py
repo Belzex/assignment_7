@@ -53,8 +53,8 @@ class movie_recommendation_by_tags:
 
 
     def read_model_content_data(self):
-        modeldata =np.loadtxt(fname = "../resources/model.txt")
-        df = pd.read_csv('../resources/movie_content.csv', encoding="Latin1")
+        modeldata =np.loadtxt(fname = 'resources/model.txt')
+        df = pd.read_csv('resources/movie_content.csv', encoding="utf-8")
         return modeldata, df
 
     #Gets the top 10 similar movies based on the content
