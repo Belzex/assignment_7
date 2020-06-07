@@ -8,7 +8,7 @@ from django.shortcuts import render
 from recommendation.algorithm_interface import algorithm_interface
 from recommendation.data_management_interface import mapper
 from recommendation import recommender
-
+from recommendation.movie_recommendation_itemRating import movie_recommendation_itemRating
 # Fuzzy string matching
 from fuzzywuzzy import process
 from recommendation import similarity_measures
@@ -46,16 +46,22 @@ def recommendation(request):
         movieList1=rec.recommendMovies1(selection_id)
         movieList2=rec.recommendMovies2(selection_id)
 
-        try:
-        alg1= dict()
-        for i in range(len(movieList1)):
-            alg1[i]=get_title(movieList1[i])
-        alg2 = dict()
-        for i in range(len(movieList2)):
-            alg2[i] = get_title(movieList2[i])
+        rec_obj = movie_recommendation_itemRating()
+        movies_list3 = rec_obj.get_similar_movies_based_on_itemRating(rec_obj, selection_title)
+        print(movies_list3)
 
+        try:
+            alg1= dict()
+            for i in range(len(movieList1)):
+                alg1[i]=get_title(movieList1[i])
+            alg2 = dict()
+            for i in range(len(movieList2)):
+                alg2[i] = get_title(movieList2[i])
+            alg3 = dict()
+            for i in range(len(movies_list3)):
+                alg3[i] = movies_list3['title'][i]
         # TODO: change to the actual algorithm classes
-            alg3 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
+            #alg3 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
             alg4 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
             alg5 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
             return render(request, "recommendations.html", {"selection_title":selection_title, "alg1":alg1, "alg2":alg2, "alg3":alg3, "alg4":alg4, "alg5":alg5})

@@ -228,11 +228,11 @@ class Recommender:
         return list5[:5]
 
 
-if __name__ == "__main__":
-    rec = Recommender()
-    # knn = knn.KNN()
-
-    print(rec.recommendMovies(2))
-
-    print(rec.recommendMovies1(112852))
-    print(rec.recommendMovies2(112852))
+# if __name__ == "__main__":
+#     rec = Recommender()
+#     # knn = knn.KNN()
+#
+#     print(rec.recommendMovies(2))
+#
+#     print(rec.recommendMovies1(112852))
+#     print(rec.recommendMovies2(112852))
