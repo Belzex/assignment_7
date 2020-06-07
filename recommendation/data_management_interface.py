@@ -8,7 +8,7 @@ class mapper():
         pass
     def get_all_titles(self) -> list:
         """
-
+        Used for getting all titles of the movies in a list.
         :return: A list with all titles saved as strings
         """
         pass

@@ -51,6 +51,9 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'assignment_7.urls'
+settings_dir = os.path.dirname(__file__)
+PROJECT_ROOT = os.path.abspath(os.path.dirname(settings_dir))
+MOVIELENS_ROOT = os.path.join(PROJECT_ROOT, '')
 
 TEMPLATES = [
     {
