@@ -1,6 +1,8 @@
 import os
 
 import pandas as pd
+from django.http import HttpResponseNotFound
+
 from assignment_7.settings import MOVIELENS_ROOT
 from django.shortcuts import render
 from recommendation.algorithm_interface import algorithm_interface
@@ -25,6 +27,9 @@ def home(request):
     print("Starting")
     return render(request, "index.html", {})
 
+def error(request):
+    return render(request, "index.html", {})
+
 def recommendation(request):
     if request.method == 'POST':
         # The movie title is the value of the selected submit button in the form
@@ -40,17 +45,22 @@ def recommendation(request):
         rec = recommender.Recommender()
         movieList1=rec.recommendMovies1(selection_id)
         movieList2=rec.recommendMovies2(selection_id)
+
+        try:
         alg1= dict()
         for i in range(len(movieList1)):
             alg1[i]=get_title(movieList1[i])
         alg2 = dict()
         for i in range(len(movieList2)):
             alg2[i] = get_title(movieList2[i])
+
         # TODO: change to the actual algorithm classes
-        alg3 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
-        alg4 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
-        alg5 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
-        return render(request, "recommendations.html", {"selection_title":selection_title, "alg1":alg1, "alg2":alg2, "alg3":alg3, "alg4":alg4, "alg5":alg5})
+            alg3 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
+            alg4 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
+            alg5 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
+            return render(request, "recommendations.html", {"selection_title":selection_title, "alg1":alg1, "alg2":alg2, "alg3":alg3, "alg4":alg4, "alg5":alg5})
+        except Exception as error:
+            return render(request,"error.html", {"error":error})
 
 def matchStrings(searchQuery):
     '''
