@@ -5,9 +5,6 @@ import os
 from math import inf
 
 from recommendation import similarity_measures as sm
-from recommendation import knn
-
-
 
 MOVIE_ID: str = 'movieId'
 USER_ID: str = 'userId'
@@ -31,8 +28,7 @@ KEYWORDS_COL: str = 'keywords'
 CREDITS_COL: str = 'credits'
 SPOKEN_LANGUAGES: str = 'spoken_languages'
 
-
-DATA_PATH: str = "../resources/"
+DATA_PATH: str = "resources/"
 
 df_movies: pd.DataFrame = pd.read_csv(DATA_PATH + 'movies.csv', encoding="UTF-8",
                                       usecols=[MOVIE_ID, TITLE, GENRES_COL],
@@ -87,7 +83,8 @@ class Recommender:
                         for keyword in tmdb[KEYWORDS_COL]:
                             keywords.add(keyword[NAME])
                     self.movie_metadata[row[MOVIE_ID]] = {DIRECTORS_COL: directors, LANGUAGES_COL: languages,
-                                                          ACTORS_COL: actors, GENRES_COL: genres, KEYWORDS_COL: keywords}
+                                                          ACTORS_COL: actors, GENRES_COL: genres,
+                                                          KEYWORDS_COL: keywords}
             except FileNotFoundError:
                 print('no metadata for movie ' + str(row[MOVIE_ID]))
 
@@ -175,7 +172,6 @@ class Recommender:
         list5 = sorted(moviePointsJaccard, key=lambda x: moviePointsJaccard[x], reverse=True)
         return list1[:5], list2[:5], list3[:5], list4[:5], list5[:5]
 
-
     def recommendMovies1(self, movieId, n=15):
         genres = self.movie_metadata[movieId]['genres']
         languages = self.movie_metadata[movieId]['languages']
@@ -226,8 +222,6 @@ class Recommender:
             moviePointsJaccard[key] = float(sm.jaccard_similarity(movieScoresRef, movieScores))
         list5 = sorted(moviePointsJaccard, key=lambda x: moviePointsJaccard[x], reverse=True)
         return list5[:5]
-
-
 
 
 if __name__ == "__main__":

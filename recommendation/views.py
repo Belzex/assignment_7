@@ -5,6 +5,7 @@ from assignment_7.settings import MOVIELENS_ROOT
 from django.shortcuts import render
 from recommendation.algorithm_interface import algorithm_interface
 from recommendation.data_management_interface import mapper
+from recommendation import recommender
 
 # Fuzzy string matching
 from fuzzywuzzy import process
@@ -36,9 +37,12 @@ def recommendation(request):
         # Title to show the user as the selected movie
         selection_title = selection.iloc[0]['title']
         # Results of different algorithms
+        rec = recommender.Recommender()
+        movieList1=rec.recommendMovies1(selection_id)
+        movieList2=rec.recommendMovies2(selection_id)
+        alg1 = {1: movieList1[0], 2: movieList1[1], 3:movieList1[2], 4:movieList1[3], 5:movieList1[4]}
+        alg2 = {1: movieList2[0], 2: movieList2[1], 3:movieList2[2], 4:movieList2[3], 5:movieList2[4]}
         # TODO: change to the actual algorithm classes
-        alg1 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
-        alg2 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
         alg3 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
         alg4 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
         alg5 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
