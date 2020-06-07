@@ -173,6 +173,8 @@ class Recommender:
         return list1[:5], list2[:5], list3[:5], list4[:5], list5[:5]
 
     def recommendMovies1(self, movieId, n=15):
+        if movieId not in self.movie_metadata:
+            return []
         genres = self.movie_metadata[movieId]['genres']
         languages = self.movie_metadata[movieId]['languages']
         actors = self.movie_metadata[movieId]['actors']
@@ -203,6 +205,8 @@ class Recommender:
         return list5[:5]
 
     def recommendMovies2(self, movieId):
+        if movieId not in self.movie_metadata:
+            return []
         genres = self.movie_metadata[movieId]['genres']
         keywords = self.movie_metadata[movieId]['keywords']
 
