@@ -40,8 +40,8 @@ def recommendation(request):
         rec = recommender.Recommender()
         movieList1=rec.recommendMovies1(selection_id)
         movieList2=rec.recommendMovies2(selection_id)
-        alg1 = {1: movieList1[0], 2: movieList1[1], 3:movieList1[2], 4:movieList1[3], 5:movieList1[4]}
-        alg2 = {1: movieList2[0], 2: movieList2[1], 3:movieList2[2], 4:movieList2[3], 5:movieList2[4]}
+        alg1 = {1: get_title(movieList1[0]), 2: get_title(movieList1[1]), 3:get_title(movieList1[2]), 4:get_title(movieList1[3]), 5:get_title(movieList1[4])}
+        alg2 = {1: get_title(movieList2[0]), 2: get_title(movieList2[1]), 3:get_title(movieList2[2]), 4:get_title(movieList2[3]), 5:get_title(movieList2[4])}
         # TODO: change to the actual algorithm classes
         alg3 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
         alg4 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
@@ -109,3 +109,23 @@ def get_all_titles():
     for title in df_movies_titles:
         movie_titles.append(title)
     return movie_titles
+
+def get_title(movieId: int):
+
+    '''
+    Get the title from the movieId attribute.
+    :param: the id of the movie
+    :return: the title of the movie
+    '''
+
+    # Currently needs to be implemented here as no global class was created (which is useable)
+
+    MOVIE_ID: str = 'movieId'
+    TITLE: str = 'title'
+    PATH = os.path.join(MOVIELENS_ROOT, 'movies.csv')
+    print(PATH)
+    df_movies: pd.DataFrame = pd.read_csv(PATH, encoding="UTF-8",
+                                          usecols=[MOVIE_ID, TITLE],
+                                          dtype={MOVIE_ID: 'int32', TITLE: 'str'})
+    df_movies.set_index(MOVIE_ID, inplace=True)
+    return df_movies.loc[movieId][TITLE]
