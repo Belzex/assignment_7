@@ -6,9 +6,10 @@ class mapper():
         :return: The movie object associated with this title
         """
         pass
-    def get_all_titles(self) -> list:
+    @staticmethod
+    def get_all_titles() -> list:
         """
-
+        Used for getting all titles of the movies in a list.
         :return: A list with all titles saved as strings
         """
         pass

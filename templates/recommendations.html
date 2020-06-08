@@ -39,9 +39,7 @@
                      <img src="https://m.media-amazon.com/images/M/MV5BMDdmZGU3NDQtY2E5My00ZTliLWIzOTUtMTY4ZGI1YjdiNjk3XkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_SY1000_CR0,0,671,1000_AL_.jpg"
                              style="width: 300px; height:400px">
                     <br>
-                    <p>You previously selected: {{ selection }}</p>
-                    <p>Description</p>
-                    <p>Actors</p>
+                    <p>You previously selected: {{ selection_title }}</p>
 
                 </div>
                 <div class="col-1">
@@ -62,6 +60,7 @@
                 <div class="col-1">
                     LIST 1
                 </div>
+            {% if alg1 %}
                 {% for movie in alg1.values %}
                 <div class="col-2">
                 <img src="https://m.media-amazon.com/images/M/MV5BMDdmZGU3NDQtY2E5My00ZTliLWIzOTUtMTY4ZGI1YjdiNjk3XkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_SY1000_CR0,0,671,1000_AL_.jpg"
@@ -69,6 +68,7 @@
                     {{ movie }}
                 </div>
                 {% endfor %}
+            {% endif %}
                 <div class="col-1">
                 </div>
             </div>
@@ -77,6 +77,7 @@
                 <div class="col-1">
                     LIST 2
                 </div>
+            {% if alg2 %}
                  {% for movie in alg2.values %}
                 <div class="col-2">
                 <img src="https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SY1000_CR0,0,674,1000_AL_.jpg"
@@ -84,6 +85,7 @@
                     {{ movie }}
                 </div>
                 {% endfor %}
+            {% endif %}
                 <div class="col-1">
                 </div>
             </div>
