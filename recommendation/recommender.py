@@ -172,7 +172,7 @@ class Recommender:
         list5 = sorted(moviePointsJaccard, key=lambda x: moviePointsJaccard[x], reverse=True)
         return list1[:5], list2[:5], list3[:5], list4[:5], list5[:5]
 
-    def recommendMovies1(self, movieId, n=15):
+    def recommendMovies1(self, movieId: int, n: int = 15):
         if movieId not in self.movie_metadata:
             return []
         genres = self.movie_metadata[movieId]['genres']
@@ -201,10 +201,10 @@ class Recommender:
             Recommender.matchWithBias(movie[KEYWORDS_COL], keywords, n, 1, movieScores)
 
             moviePointsCosine[key] = float(sm.cosine_similarity(movieScoresRef, movieScores))
-        list5 = sorted(moviePointsCosine, key=lambda x: moviePointsCosine[x], reverse=True)
-        return list5[:5]
+        returnList = sorted(moviePointsCosine, key=lambda x: moviePointsCosine[x], reverse=True)
+        return returnList[:5]
 
-    def recommendMovies2(self, movieId):
+    def recommendMovies2(self, movieId: int):
         if movieId not in self.movie_metadata:
             return []
         genres = self.movie_metadata[movieId]['genres']
@@ -224,9 +224,8 @@ class Recommender:
             Recommender.matchWithBias(movie[KEYWORDS_COL], keywords, 15, 5, movieScores)
 
             moviePointsJaccard[key] = float(sm.jaccard_similarity(movieScoresRef, movieScores))
-        list5 = sorted(moviePointsJaccard, key=lambda x: moviePointsJaccard[x], reverse=True)
-        return list5[:5]
-
+        returnList = sorted(moviePointsJaccard, key=lambda x: moviePointsJaccard[x], reverse=True)
+        return returnList[:5]
 
 # if __name__ == "__main__":
 #     rec = Recommender()
