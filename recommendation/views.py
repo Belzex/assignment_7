@@ -15,6 +15,7 @@ from recommendation.movie_recommendation_by_tags import movie_recommendation_by_
 from fuzzywuzzy import process
 from recommendation import similarity_measures
 
+
 def home(request):
     if request.method == 'POST':
         print("Searching")
@@ -23,14 +24,16 @@ def home(request):
         searchQuery = data.get('movieTextField')
         print(searchQuery)
         results = matchStrings(searchQuery)
-        return render(request, "index.html", {"results":results})
+        return render(request, "index.html", {"results": results})
 
     # No search query yet entered
     print("Starting")
     return render(request, "index.html", {})
 
+
 def error(request):
     return render(request, "index.html", {})
+
 
 def recommendation(request):
     if request.method == 'POST':
@@ -45,48 +48,38 @@ def recommendation(request):
         selection_title = selection.iloc[0]['title']
         # Results of different algorithms
         rec = recommender.Recommender()
-        movieList1=rec.recommendMovies1(selection_id)
-        movieList2=rec.recommendMovies2(selection_id)
+        movieList1 = rec.metadataRecommeder(selection_id)
+        movieList2 = rec.metadataRecommenderKeywords(selection_id)
 
         rec_obj = movie_recommendation_itemRating()
         movies_list3 = rec_obj.get_similar_movies_based_on_itemRating(rec_obj, selection_title)
-        print(movies_list3)
         obj_rec = movie_recommendation_by_genre()
         movies_list4 = obj_rec.get_similar_movies_based_on_genre(selection_title)
-        print(movies_list4)
         obj = movie_recommendation_by_tags()
-        movies_list5  = obj.get_similar_movies_based_on_tags(selection_title)
-        print(movies_list5)
+        movies_list5 = obj.get_similar_movies_based_on_tags(selection_title)
         try:
-            alg1= dict()
+            alg1 = dict()
             for i in range(len(movieList1)):
-                alg1[i]=get_title(movieList1[i])
+                alg1[i] = get_title(movieList1[i])
             alg2 = dict()
             for i in range(len(movieList2)):
                 alg2[i] = get_title(movieList2[i])
             alg3 = dict()
-            for i in range(len(movies_list3)+4):
-                movie_temp =movies_list3['title'][i]
-                print(movie_temp)
-                alg3[i] = movie_temp
+            for i in range(len(movies_list3['title'])):
+                alg3[i] = movies_list3['title'][i]
             alg4 = dict()
-            for i in range(len(movies_list4)+3):
-                tem= movies_list4['title'][i]
-                print(tem)
+            for i in range(len(movies_list4['title'])):
                 alg4[i] = movies_list4['title'][i]
             alg5 = dict()
-            for i in range(len(movies_list5)+3):
-                temp= movies_list5['title'][i]
-                print(temp)
+            for i in range(len(movies_list5['title'])):
                 alg5[i] = movies_list5['title'][i]
 
-        # TODO: change to the actual algorithm classes
-            #alg3 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
-            #alg4 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
-            #alg5 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
-            return render(request, "recommendations.html", {"selection_title":selection_title, "alg1":alg1, "alg2":alg2, "alg3":alg3, "alg4":alg4, "alg5":alg5})
+            return render(request, "recommendations.html",
+                          {"selection_title": selection_title, "alg1": alg1, "alg2": alg2, "alg3": alg3, "alg4": alg4,
+                           "alg5": alg5})
         except Exception as error:
-            return render(request,"error.html", {"error":error})
+            return render(request, "error.html", {"error": error})
+
 
 def matchStrings(searchQuery):
     '''
@@ -100,6 +93,7 @@ def matchStrings(searchQuery):
     ratios = process.extract(searchQuery, all_movies)
     # Returns the 5 elements with the highest accuracy
     return ratios
+
 
 def map_string_to_movie(selectionQuery):
     '''
@@ -117,7 +111,6 @@ def map_string_to_movie(selectionQuery):
     MOVIE_ID: str = 'movieId'
     TITLE: str = 'title'
     PATH = os.path.join(MOVIELENS_ROOT, 'movies.csv')
-    print(PATH)
     df_movies: pd.DataFrame = pd.read_csv(PATH, encoding="UTF-8",
                                           usecols=[MOVIE_ID, TITLE],
                                           dtype={MOVIE_ID: 'int32', TITLE: 'str'})
@@ -126,8 +119,8 @@ def map_string_to_movie(selectionQuery):
     movie_object = df_movies.loc[df_movies[TITLE] == movie_title]
     return movie_object
 
-def get_all_titles():
 
+def get_all_titles():
     '''
     For the fuzzy string match a list of all titles needs to be provided for it to work.
     :return: A list of all titles
@@ -138,7 +131,6 @@ def get_all_titles():
     MOVIE_ID: str = 'movieId'
     TITLE: str = 'title'
     PATH = os.path.join(MOVIELENS_ROOT, 'movies.csv')
-    print(PATH)
     df_movies: pd.DataFrame = pd.read_csv(PATH, encoding="UTF-8",
                                           usecols=[MOVIE_ID, TITLE],
                                           dtype={MOVIE_ID: 'int32', TITLE: 'str'})
@@ -150,8 +142,8 @@ def get_all_titles():
         movie_titles.append(title)
     return movie_titles
 
-def get_title(movieId: int):
 
+def get_title(movieId: int):
     '''
     Get the title from the movieId attribute.
     :param: the id of the movie
@@ -163,7 +155,6 @@ def get_title(movieId: int):
     MOVIE_ID: str = 'movieId'
     TITLE: str = 'title'
     PATH = os.path.join(MOVIELENS_ROOT, 'movies.csv')
-    print(PATH)
     df_movies: pd.DataFrame = pd.read_csv(PATH, encoding="UTF-8",
                                           usecols=[MOVIE_ID, TITLE],
                                           dtype={MOVIE_ID: 'int32', TITLE: 'str'})

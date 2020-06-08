@@ -1,6 +1,5 @@
 import pandas as pd
 import json
-import os
 
 from math import inf
 
@@ -130,7 +129,14 @@ class Recommender:
             score += bias
         dstList.append(score)
 
-    def recommendMovies(self, movieId: int, bias: int = 15, negBias: int = 1):
+    def generalMetadataRecommender(self, movieId: int, bias: int = 15, negBias: int = 1):
+        '''
+        general Metadata recommender based on genres, language, actors, directors and keywords with multiple similarity measures
+        :param movieId: the id of the movie
+        :param bias: the scoring bias
+        :param negBias: the negative scoring bias
+        :return: 5 lists of movie ids, they may be [], maximum length of each list is 5
+        '''
         genres: list = self.movie_metadata[movieId][GENRES_COL]
         languages: list = self.movie_metadata[movieId][LANGUAGES_COL]
         actors: list = self.movie_metadata[movieId][ACTORS_COL]
@@ -172,7 +178,13 @@ class Recommender:
         list5 = sorted(moviePointsJaccard, key=lambda x: moviePointsJaccard[x], reverse=True)
         return list1[:5], list2[:5], list3[:5], list4[:5], list5[:5]
 
-    def recommendMovies1(self, movieId, n=15):
+    def metadataRecommeder(self, movieId, bias=15):
+        '''
+        Metadata recommender based on genres, language, actors, directors and keywords
+        :param movieId: the id of the movie
+        :param bias: the scoring bias
+        :return: list of movie ids, may be [], maximum length is 5
+        '''
         if movieId not in self.movie_metadata:
             return []
         genres = self.movie_metadata[movieId]['genres']
@@ -182,11 +194,11 @@ class Recommender:
         keywords = self.movie_metadata[movieId]['keywords']
 
         movieScoresRef = list()
-        Recommender.addScoreToList(genres, n, movieScoresRef)
-        Recommender.addScoreToList(languages, n, movieScoresRef)
-        Recommender.addScoreToList(actors, n, movieScoresRef)
-        Recommender.addScoreToList(directors, n, movieScoresRef)
-        Recommender.addScoreToList(keywords, n, movieScoresRef)
+        Recommender.addScoreToList(genres, bias, movieScoresRef)
+        Recommender.addScoreToList(languages, bias, movieScoresRef)
+        Recommender.addScoreToList(actors, bias, movieScoresRef)
+        Recommender.addScoreToList(directors, bias, movieScoresRef)
+        Recommender.addScoreToList(keywords, bias, movieScoresRef)
 
         moviePointsCosine = dict()
 
@@ -194,17 +206,22 @@ class Recommender:
             if key == movieId:
                 continue
             movieScores = list()
-            Recommender.matchWithBias(movie[GENRES_COL], genres, n, 1, movieScores)
-            Recommender.matchWithBias(movie[LANGUAGES_COL], languages, n, 1, movieScores)
-            Recommender.matchWithBias(movie[ACTORS_COL], actors, n, 1, movieScores)
-            Recommender.matchWithBias(movie[DIRECTORS_COL], directors, n, 1, movieScores)
-            Recommender.matchWithBias(movie[KEYWORDS_COL], keywords, n, 1, movieScores)
+            Recommender.matchWithBias(movie[GENRES_COL], genres, bias, 1, movieScores)
+            Recommender.matchWithBias(movie[LANGUAGES_COL], languages, bias, 1, movieScores)
+            Recommender.matchWithBias(movie[ACTORS_COL], actors, bias, 1, movieScores)
+            Recommender.matchWithBias(movie[DIRECTORS_COL], directors, bias, 1, movieScores)
+            Recommender.matchWithBias(movie[KEYWORDS_COL], keywords, bias, 1, movieScores)
 
             moviePointsCosine[key] = float(sm.cosine_similarity(movieScoresRef, movieScores))
-        list5 = sorted(moviePointsCosine, key=lambda x: moviePointsCosine[x], reverse=True)
-        return list5[:5]
+        recommendation = sorted(moviePointsCosine, key=lambda x: moviePointsCosine[x], reverse=True)
+        return recommendation[:5]
 
-    def recommendMovies2(self, movieId):
+    def metadataRecommenderKeywords(self, movieId):
+        '''
+        Metadata recommender based on keywords and genres
+        :param movieId: the id of the movie
+        :return: list of movie ids, may be [], maximum length is 5
+        '''
         if movieId not in self.movie_metadata:
             return []
         genres = self.movie_metadata[movieId]['genres']
@@ -224,15 +241,5 @@ class Recommender:
             Recommender.matchWithBias(movie[KEYWORDS_COL], keywords, 15, 5, movieScores)
 
             moviePointsJaccard[key] = float(sm.jaccard_similarity(movieScoresRef, movieScores))
-        list5 = sorted(moviePointsJaccard, key=lambda x: moviePointsJaccard[x], reverse=True)
-        return list5[:5]
-
-
-# if __name__ == "__main__":
-#     rec = Recommender()
-#     # knn = knn.KNN()
-#
-#     print(rec.recommendMovies(2))
-#
-#     print(rec.recommendMovies1(112852))
-#     print(rec.recommendMovies2(112852))
+        recommendation = sorted(moviePointsJaccard, key=lambda x: moviePointsJaccard[x], reverse=True)
+        return recommendation[:5]
