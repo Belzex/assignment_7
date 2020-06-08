@@ -1,16 +1,16 @@
 import os
 
 import pandas as pd
-from django.http import HttpResponseNotFound
 
 from assignment_7.settings import MOVIELENS_ROOT
 from django.shortcuts import render
-from recommendation.algorithm_interface import algorithm_interface
-from recommendation.data_management_interface import mapper
 from recommendation import recommender
 from recommendation.movie_recommendation_itemRating import movie_recommendation_itemRating
 from recommendation.movie_recommendation_by_genre import movie_recommendation_by_genre
 from recommendation.movie_recommendation_by_tags import movie_recommendation_by_tags
+import requests
+import urllib
+
 # Fuzzy string matching
 from fuzzywuzzy import process
 from recommendation import similarity_measures
@@ -20,8 +20,10 @@ def home(request):
         print("Searching")
         # Extract the search query from page
         data = request.POST.copy()
+        # Query saved in Textfield
         searchQuery = data.get('movieTextField')
         print(searchQuery)
+        # Match the searchquery and return the result
         results = matchStrings(searchQuery)
         return render(request, "index.html", {"results":results})
 
@@ -79,11 +81,6 @@ def recommendation(request):
                 temp= movies_list5['title'][i]
                 print(temp)
                 alg5[i] = movies_list5['title'][i]
-
-        # TODO: change to the actual algorithm classes
-            #alg3 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
-            #alg4 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
-            #alg5 = {1: 'Movie 1', 2: 'Movie 2', 3:'Movie 3', 4:'Movie 4', 5:'Movie 5'}
             return render(request, "recommendations.html", {"selection_title":selection_title, "alg1":alg1, "alg2":alg2, "alg3":alg3, "alg4":alg4, "alg5":alg5})
         except Exception as error:
             return render(request,"error.html", {"error":error})
@@ -132,16 +129,7 @@ def get_all_titles():
     For the fuzzy string match a list of all titles needs to be provided for it to work.
     :return: A list of all titles
     '''
-
-    # Currently needs to be implemented here as no global class was created (which is useable)
-
-    MOVIE_ID: str = 'movieId'
-    TITLE: str = 'title'
-    PATH = os.path.join(MOVIELENS_ROOT, 'movies.csv')
-    print(PATH)
-    df_movies: pd.DataFrame = pd.read_csv(PATH, encoding="UTF-8",
-                                          usecols=[MOVIE_ID, TITLE],
-                                          dtype={MOVIE_ID: 'int32', TITLE: 'str'})
+    df_movies = get_movie_df()
     # A list for all movie titles is created
     movie_titles = []
     # Iterating over all movie titles and storing them in a new list
@@ -157,9 +145,14 @@ def get_title(movieId: int):
     :param: the id of the movie
     :return: the title of the movie
     '''
+    df_movies = get_movie_df()
+    return df_movies.loc[movieId]['title']
 
-    # Currently needs to be implemented here as no global class was created (which is useable)
-
+def get_movie_df():
+    '''
+    Read file and create a dataframe containing movieId and the movie title
+    :return: The dataframe containing movieId and title
+    '''
     MOVIE_ID: str = 'movieId'
     TITLE: str = 'title'
     PATH = os.path.join(MOVIELENS_ROOT, 'movies.csv')
@@ -168,4 +161,5 @@ def get_title(movieId: int):
                                           usecols=[MOVIE_ID, TITLE],
                                           dtype={MOVIE_ID: 'int32', TITLE: 'str'})
     df_movies.set_index(MOVIE_ID, inplace=True)
-    return df_movies.loc[movieId][TITLE]
+    return df_movies
+
