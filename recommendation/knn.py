@@ -111,7 +111,7 @@ class KNN:
 
         return sparse_movie_user_matrix, movie_dictionary
 
-    def _inference(self, model, data, movie_dictionary: dict,
+    def _inference(self, model: NearestNeighbors, data, movie_dictionary: dict,
                    movie_title: str, n_recommendations: int):
         """
                 return top n similar movie recommendations based on user's input movie
@@ -174,4 +174,4 @@ class KNN:
 
 if __name__ == '__main__':
     knn = KNN(5, 3)
-    knn.make_recommendations('Lord of the Rings: The Return of the King', 15)
+    knn.make_recommendations('Lord of the Rings: The Return of the King', 15, True)
