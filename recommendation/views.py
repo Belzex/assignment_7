@@ -8,8 +8,7 @@ from recommendation import recommender
 from recommendation.movie_recommendation_itemRating import movie_recommendation_itemRating
 from recommendation.movie_recommendation_by_genre import movie_recommendation_by_genre
 from recommendation.movie_recommendation_by_tags import movie_recommendation_by_tags
-import requests
-import urllib
+
 
 # Fuzzy string matching
 from fuzzywuzzy import process
