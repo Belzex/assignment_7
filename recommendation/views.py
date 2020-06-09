@@ -57,7 +57,7 @@ def recommendation(request):
         print('selection id {}, selection title {}'.format(selection_id, selection_title))
         # Results of different algorithms
         rec = recommender.Recommender()
-        movieList1 = rec.metadataRecommeder(type(selection_id))
+        movieList1 = rec.metadataRecommeder(selection_id)
         movieList2 = rec.metadataRecommenderKeywords(selection_id)
 
         rec_obj = movie_recommendation_itemRating()
