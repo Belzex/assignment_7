@@ -6,7 +6,6 @@ import pandas as pd
 
 from recommendation import recommender
 
-
 df_movies: pd.DataFrame = recommender.df_movies
 df_ratings: pd.DataFrame = recommender.df_ratings
 
@@ -24,8 +23,8 @@ model_knn = NearestNeighbors(metric='cosine', algorithm='brute', n_neighbors=15,
 
 MOVIE_ID: str = recommender.MOVIE_ID
 
-class KNN:
 
+class KNN:
 
     def __init__(self, movie_path: str, ratings_path: str):
         self.movie_path: str = movie_path

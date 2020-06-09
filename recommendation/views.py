@@ -8,7 +8,7 @@ from recommendation import recommender
 from recommendation.movie_recommendation_itemRating import movie_recommendation_itemRating
 from recommendation.movie_recommendation_by_genre import movie_recommendation_by_genre
 from recommendation.movie_recommendation_by_tags import movie_recommendation_by_tags
-
+import recommendation.movie_poster as mp
 
 # Fuzzy string matching
 from fuzzywuzzy import process
@@ -25,7 +25,13 @@ def home(request):
         print(searchQuery)
         # Match the searchquery and return the result
         results = matchStrings(searchQuery)
-        return render(request, "index.html", {"results": results})
+
+        temp_dict = dict(results)
+
+        for key in temp_dict.keys():
+            temp_dict[key] = mp.get_image_url(key)
+
+        return render(request, "index.html", {"results": temp_dict})
 
     # No search query yet entered
     print("Starting")
@@ -40,7 +46,7 @@ def recommendation(request):
     if request.method == 'POST':
         # The movie title is the value of the selected submit button in the form
         selection_query = request.POST['submit']
-        print(selection_query)
+        print('Selection query: {}'.format(selection_query))
         # Again needs to be mapped to the actual movie object as only the string is provided
         selection = map_string_to_movie(selection_query)
         # ID for different algorithms to work
@@ -80,11 +86,11 @@ def recommendation(request):
 
 
 def matchStrings(searchQuery):
-    '''
+    """
     Matches a string provided by the user to the existing movie database to find the best fitting movie
     :param searchQuery: The value the user is searching for as a String
     :return: A list of five elements with the highest accuracy in terms of string matching
-    '''
+    """
     # Create a list of movie titles that should be compared to the search query
     all_movies = get_all_titles()
     # Calculate the ratios between the initial query and the list
@@ -94,18 +100,18 @@ def matchStrings(searchQuery):
 
 
 def map_string_to_movie(selectionQuery):
-    '''
+    """
     It is necessary to match a string back to its original movie object so the id can be used for further provision of information
     :param selectionQuery: Matches the string of an existing movie back to the id
     :return: A movie object with the ID and title of the movie
-    '''
+    """
 
     # Split the provided string that was used for the matching
     # It contains the score which is not needed anymore at this point
-    split_movie_title = selectionQuery.split('\'')
+    # split_movie_title = selectionQuery.split('\'')
     # Extract the actual title
-    movie_title = split_movie_title[1]
-
+    # movie_title = split_movie_title[1]
+    movie_title = selectionQuery
     MOVIE_ID: str = 'movieId'
     TITLE: str = 'title'
     PATH = os.path.join(MOVIELENS_ROOT, 'movies.csv')
@@ -119,10 +125,10 @@ def map_string_to_movie(selectionQuery):
 
 
 def get_all_titles():
-    '''
+    """
     For the fuzzy string match a list of all titles needs to be provided for it to work.
     :return: A list of all titles
-    '''
+    """
     df_movies = get_movie_df()
     # A list for all movie titles is created
     movie_titles = []
@@ -134,19 +140,19 @@ def get_all_titles():
 
 
 def get_title(movieId: int):
-    '''
+    """
     Get the title from the movieId attribute.
     :param: the id of the movie
     :return: the title of the movie
-    '''
+    """
     df_movies = get_movie_df()
     return df_movies.loc[movieId]['title']
 
 def get_movie_df():
-    '''
+    """
     Read file and create a dataframe containing movieId and the movie title
     :return: The dataframe containing movieId and title
-    '''
+    """
     MOVIE_ID: str = 'movieId'
     TITLE: str = 'title'
     PATH = os.path.join(MOVIELENS_ROOT, 'movies.csv')
@@ -155,4 +161,3 @@ def get_movie_df():
                                           dtype={MOVIE_ID: 'int32', TITLE: 'str'})
     df_movies.set_index(MOVIE_ID, inplace=True)
     return df_movies
-
