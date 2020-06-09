@@ -53,6 +53,8 @@ def recommendation(request):
         selection_id = selection.iloc[0]['movieId']
         # Title to show the user as the selected movie
         selection_title = selection.iloc[0]['title']
+
+        print('selection id {}, selection title {}'.format(selection_id, selection_title))
         # Results of different algorithms
         rec = recommender.Recommender()
         movieList1 = rec.metadataRecommeder(selection_id)
@@ -73,14 +75,20 @@ def recommendation(request):
                 alg2[i] = get_title(movieList2[i])
             alg3 = dict()
             for i in range(len(movies_list3['title'])):
-                alg3[i] = movies_list3['title'][i]
+                title = movies_list3['title'][i]
+                alg3[title] = mp.get_image_url(title)
             alg4 = dict()
             for i in range(len(movies_list4['title'])):
-                alg4[i] = movies_list4['title'][i]
+                title = movies_list4['title'][i]
+                alg4[title] = mp.get_image_url(title)
             alg5 = dict()
             for i in range(len(movies_list5['title'])):
-                alg5[i] = movies_list5['title'][i]
-            return render(request, "recommendations.html", {"selection_title":selection_title, "alg1":alg1, "alg2":alg2, "alg3":alg3, "alg4":alg4, "alg5":alg5})
+                title = movies_list5['title'][i]
+                alg5[title] = mp.get_image_url(title)
+
+            return render(request, "recommendations.html",
+                          {"selection_title": selection_title, "alg1": alg1, "alg2": alg2, "alg3": alg3, "alg4": alg4,
+                           "alg5": alg5})
         except Exception as error:
             return render(request, "error.html", {"error": error})
 
@@ -121,6 +129,7 @@ def map_string_to_movie(selectionQuery):
 
     # Map the title back to the original movie to use its id
     movie_object = df_movies.loc[df_movies[TITLE] == movie_title]
+    print(movie_object)
     return movie_object
 
 
@@ -147,6 +156,7 @@ def get_title(movieId: int):
     """
     df_movies = get_movie_df()
     return df_movies.loc[movieId]['title']
+
 
 def get_movie_df():
     """
