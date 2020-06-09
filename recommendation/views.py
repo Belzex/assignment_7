@@ -57,7 +57,7 @@ def recommendation(request):
         print('selection id {}, selection title {}'.format(selection_id, selection_title))
         # Results of different algorithms
         rec = recommender.Recommender()
-        movieList1 = rec.metadataRecommeder(selection_id)
+        movieList1 = rec.metadataRecommeder(type(selection_id))
         movieList2 = rec.metadataRecommenderKeywords(selection_id)
 
         rec_obj = movie_recommendation_itemRating()
@@ -66,13 +66,19 @@ def recommendation(request):
         movies_list4 = obj_rec.get_similar_movies_based_on_genre(selection_title)
         obj = movie_recommendation_by_tags()
         movies_list5 = obj.get_similar_movies_based_on_tags(selection_title)
+
+        selection_dict: dict = dict()
+        selection_dict[selection_title] = mp.get_image_url(selection_title)
+
         try:
             alg1 = dict()
             for i in range(len(movieList1)):
-                alg1[i] = get_title(movieList1[i])
+                title = get_title(movieList1[i])
+                alg1[title] = mp.get_image_url(title)
             alg2 = dict()
             for i in range(len(movieList2)):
-                alg2[i] = get_title(movieList2[i])
+                title = get_title(movieList2[i])
+                alg2[title] = mp.get_image_url(title)
             alg3 = dict()
             for i in range(len(movies_list3['title'])):
                 title = movies_list3['title'][i]
