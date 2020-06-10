@@ -67,8 +67,7 @@ def recommendation(request):
         obj = movie_recommendation_by_tags()
         movies_list5 = obj.get_similar_movies_based_on_tags(selection_title)
 
-        selection_dict: dict = dict()
-        selection_dict[selection_title] = mp.get_image_url(selection_title)
+        selection_tuple: tuple = (selection_title, mp.get_image_url(selection_title))
 
         try:
             alg1 = dict()
@@ -93,7 +92,7 @@ def recommendation(request):
                 alg5[title] = mp.get_image_url(title)
 
             return render(request, "recommendations.html",
-                          {"selection_title": selection_title, "alg1": alg1, "alg2": alg2, "alg3": alg3, "alg4": alg4,
+                          {"selection_title": selection_tuple, "alg1": alg1, "alg2": alg2, "alg3": alg3, "alg4": alg4,
                            "alg5": alg5})
         except Exception as error:
             return render(request, "error.html", {"error": error})
