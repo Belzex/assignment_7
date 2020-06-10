@@ -40,10 +40,10 @@
                 <div class="col-1">
                 </div>
                 <div class="col-10" style="float:left">
-                     <img src="https://m.media-amazon.com/images/M/MV5BMDdmZGU3NDQtY2E5My00ZTliLWIzOTUtMTY4ZGI1YjdiNjk3XkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_SY1000_CR0,0,671,1000_AL_.jpg"
+                     <img src= {{ selection_title.1 }}
                              style="width: 300px; height:400px">
                     <br>
-                    <p>You previously selected: {{ selection_title }}</p>
+                    <p>You previously selected: {{ selection_title.0 }}</p>
 
                 </div>
                 <div class="col-1">
@@ -65,11 +65,11 @@
                     LIST 1
                 </div>
             {% if alg1 %}
-                {% for movie in alg1.values %}
+                {% for title, url in alg1.items %}
                 <div class="col-2">
-                <img src="https://m.media-amazon.com/images/M/MV5BMDdmZGU3NDQtY2E5My00ZTliLWIzOTUtMTY4ZGI1YjdiNjk3XkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_SY1000_CR0,0,671,1000_AL_.jpg"
+                <img src= {{ url }}
                              style="width: 150px; height:200px">
-                    {{ movie }}
+                    {{ title }}
                 </div>
                 {% endfor %}
             {% endif %}
@@ -83,11 +83,11 @@
                     LIST 2
                 </div>
             {% if alg2 %}
-                 {% for movie in alg2.values %}
+                 {% for title, url in alg2.items %}
                 <div class="col-2">
-                <img src="https://m.media-amazon.com/images/M/MV5BYWZjMjk3ZTItODQ2ZC00NTY5LWE0ZDYtZTI3MjcwN2Q5NTVkXkEyXkFqcGdeQXVyODk4OTc3MTY@._V1_SY1000_CR0,0,674,1000_AL_.jpg"
+                <img src= {{ url }}
                              style="width: 150px; height:200px">
-                    {{ movie }}
+                    {{ title }}
                 </div>
                 {% endfor %}
             {% endif %}
@@ -100,11 +100,11 @@
                 <div class="col-1">
                     LIST 3
                 </div>
-                 {% for movie in alg3.values %}
+                 {% for title, url in alg3.items %}
                 <div class="col-2">
-                <img src="https://m.media-amazon.com/images/M/MV5BNGVjNWI4ZGUtNzE0MS00YTJmLWE0ZDctN2ZiYTk2YmI3NTYyXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_SY1000_CR0,0,674,1000_AL_.jpg"
+                <img src= {{ url }}
                              style="width: 150px; height:200px">
-                    {{ movie }}
+                    {{ title }}
                 </div>
                 {% endfor %}
                 <div class="col-1">
@@ -116,11 +116,11 @@
                 <div class="col-1">
                     LIST 4
                 </div>
-                 {% for movie in alg4.values %}
+                 {% for title, url in alg4.items %}
                 <div class="col-2">
-                <img src="https://m.media-amazon.com/images/M/MV5BOTdmNTFjNDEtNzg0My00ZjkxLTg1ZDAtZTdkMDc2ZmFiNWQ1XkEyXkFqcGdeQXVyNTAzNzgwNTg@._V1_SY1000_CR0,0,631,1000_AL_.jpg"
+                <img src= {{ url }}
                              style="width: 150px; height:200px">
-                    {{ movie }}
+                    {{ title }}
                 </div>
                 {% endfor %}
                 <div class="col-1">
@@ -132,11 +132,11 @@
             <div class="col-1">
                     LIST 5
                 </div>
-                 {% for movie in alg5.values %}
+                 {% for title, url in alg5.items %}
                 <div class="col-2">
-                <img src="https://m.media-amazon.com/images/M/MV5BY2U1ZTU4OWItNGU2MC00MTg1LTk4NzUtYTk3ODhjYjI0MzlmXkEyXkFqcGdeQXVyMTkxNjUyNQ@@._V1_SY1000_CR0,0,670,1000_AL_.jpg"
+                <img src= {{ url }}
                              style="width: 150px; height:200px">
-                    {{ movie }}
+                    {{ title }}
                 </div>
                 {% endfor %}
 
