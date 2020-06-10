@@ -28,6 +28,7 @@ CREDITS_COL: str = 'credits'
 SPOKEN_LANGUAGES: str = 'spoken_languages'
 
 DATA_PATH: str = "resources/"
+DATA_PATH_JSON: str = "resources/resources/"
 
 df_movies: pd.DataFrame = pd.read_csv(DATA_PATH + 'movies.csv', encoding="UTF-8",
                                       usecols=[MOVIE_ID, TITLE, GENRES_COL],
@@ -44,7 +45,7 @@ class Recommender:
         self.movie_metadata = dict()
         for index, row in df_movies.iterrows():
             try:
-                with open(DATA_PATH + str(row[MOVIE_ID]) + '.json', encoding="UTF-8") as json_file:
+                with open(DATA_PATH_JSON + str(row[MOVIE_ID]) + '.json', encoding="UTF-8") as json_file:
                     data = json.load(json_file)
                     directors = set()
                     languages = set()
