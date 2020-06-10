@@ -131,13 +131,13 @@ class Recommender:
         dstList.append(score)
 
     def generalMetadataRecommender(self, movieId: int, bias: int = 15, negBias: int = 1):
-        '''
+        """
         general Metadata recommender based on genres, language, actors, directors and keywords with multiple similarity measures
         :param movieId: the id of the movie
         :param bias: the scoring bias
         :param negBias: the negative scoring bias
         :return: 5 lists of movie ids, they may be [], maximum length of each list is 5
-        '''
+        """
         genres: list = self.movie_metadata[movieId][GENRES_COL]
         languages: list = self.movie_metadata[movieId][LANGUAGES_COL]
         actors: list = self.movie_metadata[movieId][ACTORS_COL]
@@ -180,12 +180,12 @@ class Recommender:
         return list1[:5], list2[:5], list3[:5], list4[:5], list5[:5]
 
     def metadataRecommeder(self, movieId: int, bias=15):
-        '''
+        """
         Metadata recommender based on genres, language, actors, directors and keywords
         :param movieId: the id of the movie
         :param bias: the scoring bias
         :return: list of movie ids, may be [], maximum length is 5
-        '''
+        """
         if movieId not in self.movie_metadata:
             return []
         genres = self.movie_metadata[movieId]['genres']
@@ -218,11 +218,11 @@ class Recommender:
         return recommendation[:5]
 
     def metadataRecommenderKeywords(self, movieId):
-        '''
+        """
         Metadata recommender based on keywords and genres
         :param movieId: the id of the movie
         :return: list of movie ids, may be [], maximum length is 5
-        '''
+        """
         if movieId not in self.movie_metadata:
             return []
         genres = self.movie_metadata[movieId]['genres']
