@@ -10,6 +10,9 @@ API_PREFIX: list = ['http://omdbapi.com/?apikey=56197bb3&t=', 'http://omdbapi.co
 
 
 def get_image_url(movie_title: str) -> str:
+    """
+    :param: movie_title the movie title for which an image url will be retrieved from omdb
+    """
     if type(movie_title) is not str:
         return None
 
@@ -28,7 +31,9 @@ def get_image_url(movie_title: str) -> str:
 
 def _comma_check(movie_title: str) -> str:
     """
-    Checks if a comma separates the movie title, usually, if that is the case, the
+    Checks if a comma separates the movie title, usually, if that is the case,
+    the part after the comma must be appended to the beginning of the movie_title str
+    :param movie_title: will be checked for a comma in the string
     """
     if movie_title in SPECIAL_CASES:
         return movie_title
