@@ -6,14 +6,14 @@ COMMA: str = ','
 BLANK: str = ' '
 PLUS: str = '+'
 POSTER: str = 'Poster'
-SPECIAL_CASES: list = ['Monsters, Inc.']
+YEAR_PATTERN: str = ' \(....\)';
 
-API_PREFIX: list = ['http://omdbapi.com/?apikey=56197bb3&t=', 'http://omdbapi.com/?apikey=f32e08d6&t=']
+API_KEY_PREFIX: list = ['http://omdbapi.com/?apikey=56197bb3&t=', 'http://omdbapi.com/?apikey=f32e08d6&t=']
 
 
 def get_image_url(movie_title: str) -> str:
     """
-    @param movie_title: movie_title: the movie title for which an image url will be retrieved from omdb
+    @param movie_title: movie_title: the movie title for which an image url will be retrieved from OMDb
     @return: the image url, where the poster of the movie can be found. Note: Can be of type None.
     """
     if type(movie_title) is not str:
@@ -22,8 +22,10 @@ def get_image_url(movie_title: str) -> str:
     image_url: str = _title_to_image_url(movie_title=movie_title, comma_check=True)
     json_response = _get_json_response(image_url)
 
+    # comma corrected movie_title did receive a response
     if json_response is not None:
         return json_response
+    # try without comma correction
     else:
         image_url = _title_to_image_url(movie_title=movie_title, comma_check=False)
         return _get_json_response(image_url)
@@ -33,10 +35,11 @@ def _get_json_response(image_url: str) -> str:
     """
     Transforms the image_url in parameter to a json response
     @param image_url: the image url to be transformed
-    @return: the json response of the given url
+    @return: the json response of the given url (Note: can be None)
     """
     response = requests.get(image_url)
     json_response = response.json()
+    # poster url is in the json_response
     if POSTER in json_response:
         return json_response[POSTER]
     else:
@@ -52,12 +55,12 @@ def _title_to_image_url(movie_title: str, comma_check: bool) -> str:
                         of the movie title
     @return: an image url, where the poster of the movie can be found
     """
-    year_regex = re.compile(' \(....\)')
+    year_regex = re.compile(YEAR_PATTERN)
     temp_string: str = year_regex.subn('', movie_title)[0]
     if comma_check:
         temp_string = _comma_check(temp_string)
     temp_string = temp_string.replace(BLANK, PLUS)
-    image_url: str = random.choice(API_PREFIX) + temp_string
+    image_url: str = random.choice(API_KEY_PREFIX) + temp_string
     return image_url
 
 
@@ -70,6 +73,7 @@ def _comma_check(movie_title: str) -> str:
     """
     if COMMA in movie_title:
         temp_list = movie_title.split(COMMA)
+        # remove all blanks before and after a word
         for index, value in enumerate(temp_list):
             temp_list[index] = value.strip()
         temp_str = temp_list.pop()
@@ -82,4 +86,4 @@ def _comma_check(movie_title: str) -> str:
 
 if __name__ == '__main__':
     print(get_image_url('Lion King, The'))
-    print(get_image_url('Monsters, Inc. (2001)'))
+#     print(get_image_url('Monsters, Inc. (2001)'))
