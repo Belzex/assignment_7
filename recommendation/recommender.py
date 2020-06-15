@@ -4,6 +4,7 @@ import json
 from math import inf
 
 from recommendation import similarity_measures as sm
+from recommendation.decorators import timer
 
 MOVIE_ID: str = 'movieId'
 USER_ID: str = 'userId'
@@ -179,6 +180,7 @@ class Recommender:
         list5 = sorted(moviePointsJaccard, key=lambda x: moviePointsJaccard[x], reverse=True)
         return list1[:5], list2[:5], list3[:5], list4[:5], list5[:5]
 
+    @timer
     def metadataRecommeder(self, movieId: int, bias=15):
         """
         Metadata recommender based on genres, language, actors, directors and keywords
@@ -217,6 +219,7 @@ class Recommender:
         recommendation = sorted(moviePointsCosine, key=lambda x: moviePointsCosine[x], reverse=True)
         return recommendation[:5]
 
+    @timer
     def metadataRecommenderKeywords(self, movieId):
         """
         Metadata recommender based on keywords and genres

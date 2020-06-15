@@ -68,8 +68,6 @@ def _comma_check(movie_title: str) -> str:
     @param movie_title: will be checked for a comma in the string
     @return: the comma corrected movie title if a comma is found in the string
     """
-    if movie_title in SPECIAL_CASES:
-        return movie_title
     if COMMA in movie_title:
         temp_list = movie_title.split(COMMA)
         for index, value in enumerate(temp_list):

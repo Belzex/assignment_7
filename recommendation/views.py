@@ -9,12 +9,17 @@ from recommendation.movie_recommendation_itemRating import movie_recommendation_
 from recommendation.movie_recommendation_by_genre import movie_recommendation_by_genre
 from recommendation.movie_recommendation_by_tags import movie_recommendation_by_tags
 import recommendation.movie_poster as mp
+from recommendation.decorators import timer
 
 # Fuzzy string matching
 from fuzzywuzzy import process
 from recommendation import similarity_measures
 
+MOVIE_ID: str = 'movieId'
+TITLE: str = 'title'
 
+
+@timer
 def home(request):
     if request.method == 'POST':
         print("Searching")
@@ -42,11 +47,11 @@ def error(request):
     return render(request, "index.html", {})
 
 
+@timer
 def recommendation(request):
     if request.method == 'POST':
         # The movie title is the value of the selected submit button in the form
         selection_query = request.POST['submit']
-        print('Selection query: {}'.format(selection_query))
         # Again needs to be mapped to the actual movie object as only the string is provided
         selection = map_string_to_movie(selection_query)
         # ID for different algorithms to work
@@ -70,14 +75,8 @@ def recommendation(request):
         selection_tuple: tuple = (selection_title, mp.get_image_url(selection_title))
 
         try:
-            alg1 = dict()
-            for i in range(len(movieList1)):
-                title = get_title(movieList1[i])
-                alg1[title] = mp.get_image_url(title)
-            alg2 = dict()
-            for i in range(len(movieList2)):
-                title = get_title(movieList2[i])
-                alg2[title] = mp.get_image_url(title)
+            alg1: dict = _get_movie_dict(movieList1)
+            alg2: dict = _get_movie_dict(movieList2)
             alg3 = dict()
             for i in range(len(movies_list3['title'])):
                 title = movies_list3['title'][i]
@@ -96,6 +95,14 @@ def recommendation(request):
                            "alg5": alg5})
         except Exception as error:
             return render(request, "error.html", {"error": error})
+
+
+def _get_movie_dict(movieList: list) -> dict:
+    retDict: dict = dict()
+    for idx, movie in enumerate(movieList):
+        title: str = get_title(movie)
+        retDict[title] = mp.get_image_url(title)
+    return retDict
 
 
 def matchStrings(searchQuery):
@@ -125,8 +132,6 @@ def map_string_to_movie(selectionQuery):
     # Extract the actual title
     # movie_title = split_movie_title[1]
     movie_title = selectionQuery
-    MOVIE_ID: str = 'movieId'
-    TITLE: str = 'title'
     PATH = os.path.join(MOVIELENS_ROOT, 'movies.csv')
     df_movies: pd.DataFrame = pd.read_csv(PATH, encoding="UTF-8",
                                           usecols=[MOVIE_ID, TITLE],
@@ -168,8 +173,6 @@ def get_movie_df():
     Read file and create a dataframe containing movieId and the movie title
     :return: The dataframe containing movieId and title
     """
-    MOVIE_ID: str = 'movieId'
-    TITLE: str = 'title'
     PATH = os.path.join(MOVIELENS_ROOT, 'movies.csv')
     df_movies: pd.DataFrame = pd.read_csv(PATH, encoding="UTF-8",
                                           usecols=[MOVIE_ID, TITLE],
