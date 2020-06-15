@@ -239,7 +239,7 @@ class Recommender:
                 continue
             movieScores = list()
             Recommender.matchWithBias(movie[GENRES_COL], genres, 2, 0, movieScores)
-            Recommender.matchWithBias(movie[KEYWORDS_COL], keywords, 15, 5, movieScores)
+            Recommender.matchWithBias(movie[KEYWORDS_COL], keywords, 10, 5, movieScores)
 
             moviePointsJaccard[key] = float(sm.jaccard_similarity(movieScoresRef, movieScores))
         recommendation = sorted(moviePointsJaccard, key=lambda x: moviePointsJaccard[x], reverse=True)
