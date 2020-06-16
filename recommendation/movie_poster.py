@@ -13,7 +13,7 @@ API_KEY_PREFIX: list = ['http://omdbapi.com/?apikey=56197bb3&t=', 'http://omdbap
 
 def get_image_url(movie_title: str) -> str:
     """
-    @param movie_title: movie_title: the movie title for which an image url will be retrieved from OMDb
+    @param movie_title: the movie title for which an image url will be retrieved from OMDb
     @return: the image url, where the poster of the movie can be found. Note: Can be of type None.
     """
     if type(movie_title) is not str:
@@ -84,6 +84,6 @@ def _comma_check(movie_title: str) -> str:
         return movie_title
 
 
-if __name__ == '__main__':
-    print(get_image_url('Lion King, The'))
+# if __name__ == '__main__':
+#     print(get_image_url('Lion King, The'))
 #     print(get_image_url('Monsters, Inc. (2001)'))

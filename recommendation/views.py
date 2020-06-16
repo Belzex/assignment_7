@@ -74,32 +74,30 @@ def recommendation(request):
 
         selection_tuple: tuple = (selection_title, mp.get_image_url(selection_title))
 
+        print(type(movies_list4))
+
         try:
             alg1: dict = _get_movie_dict(movieList1)
             alg2: dict = _get_movie_dict(movieList2)
-            alg3 = dict()
-            for i in range(len(movies_list3['title'])):
-                title = movies_list3['title'][i]
-                alg3[title] = mp.get_image_url(title)
-            alg4 = dict()
-            for i in range(len(movies_list4['title'])):
-                title = movies_list4['title'][i]
-                alg4[title] = mp.get_image_url(title)
-            alg5 = dict()
-            for i in range(len(movies_list5['title'])):
-                title = movies_list5['title'][i]
-                alg5[title] = mp.get_image_url(title)
+            alg3: dict = _dfToMovieDict(movies_list3)
+            alg4: dict = _dfToMovieDict(movies_list4)
+            alg5: dict = _dfToMovieDict(movies_list5)
 
             return render(request, "recommendations.html",
                           {"selection_title": selection_tuple, "alg1": alg1, "alg2": alg2, "alg3": alg3, "alg4": alg4,
                            "alg5": alg5})
-        except Exception as error:
-            return render(request, "error.html", {"error": error})
+        except Exception as excError:
+            return render(request, "error.html", {"error": excError})
+
+
+def _dfToMovieDict(movieDF) -> dict:
+    temp_list: list = [movieDF[TITLE][idx] for idx in movieDF[TITLE]]
+    return {title: mp.get_image_url(title) for title in temp_list}
 
 
 def _get_movie_dict(movieList: list) -> dict:
     retDict: dict = dict()
-    for idx, movie in enumerate(movieList):
+    for movie in movieList:
         title: str = get_title(movie)
         retDict[title] = mp.get_image_url(title)
     return retDict
