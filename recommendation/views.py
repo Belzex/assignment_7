@@ -11,6 +11,8 @@ from recommendation.movie_recommendation_by_tags import movie_recommendation_by_
 import recommendation.movie_poster as mp
 from recommendation.decorators import timer
 
+import concurrent.futures
+
 # Fuzzy string matching
 from fuzzywuzzy import process
 from recommendation import similarity_measures
@@ -64,7 +66,7 @@ def recommendation(request):
         rec = recommender.Recommender()
         movieList1 = rec.metadataRecommeder(selection_id)
         movieList2 = rec.metadataRecommenderKeywords(selection_id)
-
+        #
         rec_obj = movie_recommendation_itemRating()
         movies_list3 = rec_obj.get_similar_movies_based_on_itemRating(rec_obj, selection_title)
         obj_rec = movie_recommendation_by_genre()
@@ -74,14 +76,18 @@ def recommendation(request):
 
         selection_tuple: tuple = (selection_title, mp.get_image_url(selection_title))
 
-        print(type(movies_list4))
-
         try:
-            alg1: dict = _get_movie_dict(movieList1)
-            alg2: dict = _get_movie_dict(movieList2)
-            alg3: dict = _dfToMovieDict(movies_list3)
-            alg4: dict = _dfToMovieDict(movies_list4)
-            alg5: dict = _dfToMovieDict(movies_list5)
+            alg1: dict = dict()
+            alg2: dict = dict()
+            alg3: dict = dict()
+            alg4: dict = dict()
+            alg5: dict = dict()
+
+            movieList = [movieList1, movieList2, movies_list3, movies_list4, movies_list5]
+            alg_list = [alg1, alg2, alg3, alg4, alg5]
+
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                executor.map(_get_views_dict, movieList, alg_list)
 
             return render(request, "recommendations.html",
                           {"selection_title": selection_tuple, "alg1": alg1, "alg2": alg2, "alg3": alg3, "alg4": alg4,
@@ -90,17 +96,27 @@ def recommendation(request):
             return render(request, "error.html", {"error": excError})
 
 
-def _dfToMovieDict(movieDF) -> dict:
-    temp_list: list = [movieDF[TITLE][idx] for idx in movieDF[TITLE]]
-    return {title: mp.get_image_url(title) for title in temp_list}
+@timer
+def _get_views_dict(movie_collection: list, movie_dict: dict) -> dict:
+    if type(movie_collection) is list:
+        _get_movie_dict(movie_collection, movie_dict)
+    elif type(movie_collection) is dict:
+        _df_to_movie_dict(movie_collection, movie_dict)
+    return movie_dict
 
 
-def _get_movie_dict(movieList: list) -> dict:
-    retDict: dict = dict()
-    for movie in movieList:
+def _df_to_movie_dict(movie_df, movie_dict: dict) -> dict:
+    temp_list: list = [movie_df[TITLE][idx] for idx in movie_df[TITLE]]
+    for movie in temp_list:
+        movie_dict[movie] = mp.get_image_url(movie)
+    return movie_dict
+
+
+def _get_movie_dict(movie_list: list, movie_dict: dict) -> dict:
+    for movie in movie_list:
         title: str = get_title(movie)
-        retDict[title] = mp.get_image_url(title)
-    return retDict
+        movie_dict[title] = mp.get_image_url(title)
+    return movie_dict
 
 
 def matchStrings(searchQuery):
