@@ -64,15 +64,18 @@ def recommendation(request):
         print('selection id {}, selection title {}'.format(selection_id, selection_title))
         # Results of different algorithms
         rec = recommender.Recommender()
-        movieList1 = rec.metadataRecommeder(selection_id)
-        movieList2 = rec.metadataRecommenderKeywords(selection_id)
-        #
+
+        movies_metadata: list = rec.metadataRecommender(selection_id)
+        movies_keywords: list = rec.metadataRecommenderKeywords(selection_id)
+
         rec_obj = movie_recommendation_itemRating()
-        movies_list3 = rec_obj.get_similar_movies_based_on_itemRating(rec_obj, selection_title)
+        movies_item_rating = rec_obj.get_similar_movies_based_on_itemRating(rec_obj, selection_title)
+
         obj_rec = movie_recommendation_by_genre()
-        movies_list4 = obj_rec.get_similar_movies_based_on_genre(selection_title)
+        movies_genres = obj_rec.get_similar_movies_based_on_genre(selection_title)
+
         obj = movie_recommendation_by_tags()
-        movies_list5 = obj.get_similar_movies_based_on_tags(selection_title)
+        movies_tags = obj.get_similar_movies_based_on_tags(selection_title)
 
         selection_tuple: tuple = (selection_title, mp.get_image_url(selection_title))
 
@@ -83,12 +86,13 @@ def recommendation(request):
             alg4: dict = dict()
             alg5: dict = dict()
 
-            movieList = [movieList1, movieList2, movies_list3, movies_list4, movies_list5]
+            movieList = [movies_metadata, movies_keywords, movies_item_rating, movies_genres, movies_tags]
             alg_list = [alg1, alg2, alg3, alg4, alg5]
 
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                 executor.map(_get_views_dict, movieList, alg_list)
 
+            print(alg_list)
             return render(request, "recommendations.html",
                           {"selection_title": selection_tuple, "alg1": alg1, "alg2": alg2, "alg3": alg3, "alg4": alg4,
                            "alg5": alg5})
@@ -97,6 +101,19 @@ def recommendation(request):
 
 
 @timer
+def _get_movie_recommendations(selection_id: list, selection_title: list, movie_list_refs: list, recommender: int):
+    print(f"recommender: {recommender}")
+    if recommender == 0:
+        rec_obj = movie_recommendation_itemRating()
+        movie_list_refs[recommender] = rec_obj.get_similar_movies_based_on_itemRating(rec_obj, selection_title)
+    elif recommender == 1:
+        movie_list_refs[recommender] = movie_recommendation_by_genre().get_similar_movies_based_on_genre(
+            selection_title)
+    elif recommender == 2:
+        obj = movie_recommendation_by_tags()
+        movie_list_refs[recommender] = obj.get_similar_movies_based_on_tags(selection_title)
+
+
 def _get_views_dict(movie_collection: list, movie_dict: dict) -> dict:
     if type(movie_collection) is list:
         _get_movie_dict(movie_collection, movie_dict)

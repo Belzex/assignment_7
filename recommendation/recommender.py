@@ -181,7 +181,7 @@ class Recommender:
         return list1[:5], list2[:5], list3[:5], list4[:5], list5[:5]
 
     @timer
-    def metadataRecommeder(self, movieId: int, bias=15):
+    def metadataRecommender(self, movieId: int, bias=15):
         """
         Metadata recommender based on genres, language, actors, directors and keywords
         :param movieId: the id of the movie
