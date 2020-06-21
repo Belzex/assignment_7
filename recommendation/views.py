@@ -57,9 +57,9 @@ def recommendation(request):
         # Again needs to be mapped to the actual movie object as only the string is provided
         selection = map_string_to_movie(selection_query)
         # ID for different algorithms to work
-        selection_id = selection.iloc[0]['movieId']
+        selection_id = selection.iloc[0][MOVIE_ID]
         # Title to show the user as the selected movie
-        selection_title = selection.iloc[0]['title']
+        selection_title = selection.iloc[0][TITLE]
 
         print('selection id {}, selection title {}'.format(selection_id, selection_title))
         # Results of different algorithms
@@ -92,26 +92,11 @@ def recommendation(request):
             with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
                 executor.map(_get_views_dict, movieList, alg_list)
 
-            print(alg_list)
             return render(request, "recommendations.html",
                           {"selection_title": selection_tuple, "alg1": alg1, "alg2": alg2, "alg3": alg3, "alg4": alg4,
                            "alg5": alg5})
         except Exception as excError:
             return render(request, "error.html", {"error": excError})
-
-
-@timer
-def _get_movie_recommendations(selection_id: list, selection_title: list, movie_list_refs: list, recommender: int):
-    print(f"recommender: {recommender}")
-    if recommender == 0:
-        rec_obj = movie_recommendation_itemRating()
-        movie_list_refs[recommender] = rec_obj.get_similar_movies_based_on_itemRating(rec_obj, selection_title)
-    elif recommender == 1:
-        movie_list_refs[recommender] = movie_recommendation_by_genre().get_similar_movies_based_on_genre(
-            selection_title)
-    elif recommender == 2:
-        obj = movie_recommendation_by_tags()
-        movie_list_refs[recommender] = obj.get_similar_movies_based_on_tags(selection_title)
 
 
 def _get_views_dict(movie_collection: list, movie_dict: dict) -> dict:
@@ -130,6 +115,12 @@ def _df_to_movie_dict(movie_df, movie_dict: dict) -> dict:
 
 
 def _get_movie_dict(movie_list: list, movie_dict: dict) -> dict:
+    """
+    Reads all movies of the movie list and stores each title as the key of the movie_dict reference in the parameter.
+    @param movie_list: contains all movie titles which will be used as keys of the dictionary
+    @param movie_dict: dictionary, which uses the movie title as the key and the movie poster url as the value
+    @return: the final movie_dict object
+    """
     for movie in movie_list:
         title: str = get_title(movie)
         movie_dict[title] = mp.get_image_url(title)
