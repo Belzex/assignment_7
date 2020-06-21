@@ -2,10 +2,14 @@ from sklearn.metrics.pairwise import linear_kernel
 import pandas as pd
 import numpy as np
 from recommendation.decorators import timer
+import concurrent.futures
+
+modeldata = np.loadtxt(fname='resources/model.txt')
 
 
 class movie_recommendation_by_tags:
     # one time offline initialization
+    @timer
     def offline_initialization(self, moviesdata, tagsdata):
         # reading the movies dataset
         movie_list = pd.read_csv(moviesdata, encoding="Latin1")
@@ -52,8 +56,8 @@ class movie_recommendation_by_tags:
         # write Movie contents for runtime recommendations
         movie_content_df_temp.to_csv('movie_content.csv', index=True, header=True)
 
+    @timer
     def read_model_content_data(self):
-        modeldata = np.loadtxt(fname='resources/model.txt')
         df = pd.read_csv('resources/movie_content.csv', encoding="utf-8")
         return modeldata, df
 
