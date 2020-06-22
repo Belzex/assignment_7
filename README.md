@@ -1,6 +1,6 @@
 # Python Interpreter Setup
 The following steps guide you through the process of the project setup.
-It is assumed, that a terminal is used for the setup process and the current directory is the ```assignment7/``` directory of the project.
+It is assumed, that a terminal is used for the setup process and the current directory is the root directory of the project.
 
 ## Install virtual environment
 
@@ -23,4 +23,4 @@ The required python libraries are installed with the following command:
 
 ### Add virtual environment to your IDE
 As a last step, the virtual environment has to be set in your IDE as the interpreter of this project. After doing so, it might be possible, that a restart of the IDE is necessary to conclude the installation.
-For example: ```assignment_7/venv/bin/python3```
+For example: ```venv/bin/python3```
