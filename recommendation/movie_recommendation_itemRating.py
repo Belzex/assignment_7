@@ -1,16 +1,17 @@
 import pandas as pd
 import numpy as np
-import sklearn
 from sklearn.decomposition import TruncatedSVD
-from sklearn.metrics.pairwise import linear_kernel
 from recommendation.decorators import timer
 
+# logger to track the application process
+from recommendation.logger_config import logging
 
-class movie_recommendation_itemRating:
+
+class MovieRecommendationItemRating:
     @staticmethod
     def data_initialization(self):
+        logging.debug(f'[{MovieRecommendationItemRating.data_initialization.__name__}] - start of function')
         df_movies, df_ratings = self.read_files()
-        # df_ratings = df_ratings[:2650000]
         combine_movie_rating = pd.merge(df_ratings, df_movies, on='movieId')
         combine_movie_rating = combine_movie_rating.dropna(axis=0, subset=['title'])
         movie_ratingCount = (combine_movie_rating.
@@ -36,6 +37,7 @@ class movie_recommendation_itemRating:
 
     # reading data files
     def read_files(self):
+        logging.debug(f'[{self.read_files.__name__}] - reading csv files')
         df_movies = pd.read_csv('resources/movies.csv', encoding="Latin1")
         df_ratings = pd.read_csv('resources/ratings.csv', usecols=['userId', 'movieId', 'rating'])
         return df_movies, df_ratings
@@ -44,6 +46,9 @@ class movie_recommendation_itemRating:
     @staticmethod
     @timer
     def get_similar_movies_based_on_itemRating(self, input_movie_title):
+        logging.debug(
+            f'[{MovieRecommendationItemRating.get_similar_movies_based_on_itemRating.__name__}] - '
+            f'start of function with movie title <{input_movie_title}>')
         movie_title, model, df_movies = self.data_initialization(self)
         movie_title_list = list(movie_title)
         movie_index = movie_title_list.index(input_movie_title)
@@ -51,15 +56,10 @@ class movie_recommendation_itemRating:
         sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
         sim_scores = sim_scores[1:6]
         movie_indices = [i[0] for i in sim_scores]
-        movie_sim_scores = [i[1] for i in sim_scores]
-        scores = [round(x, 2) for x in movie_sim_scores]
         similar_movies = pd.DataFrame()
         similar_movies['title'] = movie_title[movie_indices]
-        # similar_movies['score'] = scores
-        temp_genre = pd.merge(similar_movies, df_movies, on=['title'], how='left')
-        # similar_movies['genre'] = temp_genre['genres']
-
-        print("item-rating executed")
+        logging.debug(
+            f'[{MovieRecommendationItemRating.get_similar_movies_based_on_itemRating.__name__}] - item-rating executed')
         return similar_movies.to_dict()
 
 # if __name__ == '__main__':

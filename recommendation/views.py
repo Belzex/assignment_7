@@ -5,7 +5,7 @@ import pandas as pd
 from assignment_7.settings import MOVIELENS_ROOT
 from django.shortcuts import render
 from recommendation import recommender
-from recommendation.movie_recommendation_itemRating import movie_recommendation_itemRating
+from recommendation.movie_recommendation_itemRating import MovieRecommendationItemRating
 from recommendation.movie_recommendation_by_genre import MovieRecommendationByGenre
 from recommendation.movie_recommendation_by_tags import MovieRecommendationByTags
 import recommendation.movie_poster as mp
@@ -73,7 +73,7 @@ def recommendation(request):
         movies_metadata: list = rec.metadata_recommender(selection_id)
         movies_keywords: list = rec.metadata_recommender_with_keywords(selection_id)
 
-        rec_obj = movie_recommendation_itemRating()
+        rec_obj = MovieRecommendationItemRating()
         movies_item_rating = rec_obj.get_similar_movies_based_on_itemRating(rec_obj, selection_title)
 
         obj_rec = MovieRecommendationByGenre()
