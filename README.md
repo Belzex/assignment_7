@@ -23,4 +23,4 @@ The required python libraries are installed with the following command:
 
 ### Add virtual environment to your IDE
 As a last step, the virtual environment has to be set in your IDE as the interpreter of this project. After doing so, it might be possible, that a restart of the IDE is necessary to conclude the installation.
-For example: ```rec_project/assignment_7/venv/bin/python3```
+For example: ```assignment_7/venv/bin/python3```
