@@ -36,6 +36,10 @@ For example: ```venv/bin/python3```
 
 # Starting the project
 This step is done in the root folder of the project. 
-After the successful setup of the python virtual environment run the command ```$ python manage.py runserver``` in the terminal.
+After the successful setup of the python virtual environment run the command: 
+
+```$ python manage.py runserver``` 
+
+
 The Django server should start and a message containing the address of where to find the web server in the browser should be printed to the command line.
 Simply follow this address and test the recommendation system.
