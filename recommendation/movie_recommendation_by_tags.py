@@ -2,18 +2,23 @@ from sklearn.metrics.pairwise import linear_kernel
 import pandas as pd
 import numpy as np
 from recommendation.decorators import timer
-import concurrent.futures
 
-modeldata = np.loadtxt(fname='resources/model.txt')
+# logger to track the application process
+from recommendation.logger_config import logging
+
+model_data = np.loadtxt(fname='resources/model.txt')
 
 
-class movie_recommendation_by_tags:
+class MovieRecommendationByTags:
     # one time offline initialization
     @timer
-    def offline_initialization(self, moviesdata, tagsdata):
+    def offline_initialization(self, movies_data, tags_data):
+        logging.debug(
+            f'[{self.offline_initialization.__name__}] - '
+            f'start of function with movies_data <{movies_data}> and tags_data <{tags_data}>')
         # reading the movies dataset
-        movie_list = pd.read_csv(moviesdata, encoding="Latin1")
-        tag_list = pd.read_csv(tagsdata, encoding="Latin1")
+        movie_list = pd.read_csv(movies_data, encoding="Latin1")
+        tag_list = pd.read_csv(tags_data, encoding="Latin1")
 
         movie_tags_list = ""
         for index, row in tag_list.iterrows():
@@ -27,12 +32,12 @@ class movie_recommendation_by_tags:
 
         df = pd.DataFrame(columns={'movieId', 'tags'})
         for row in movie_list.iterrows():
-            movieid = row[1]['movieId']
-            df_temp = tag_list.loc[tag_list['movieId'] == movieid]
+            movie_id = row[1]['movieId']
+            df_temp = tag_list.loc[tag_list['movieId'] == movie_id]
             tag_lst = ""
             for tag in df_temp.iterrows():
                 tag_lst = tag_lst + str(tag[1]['tag']) + '|'
-            df = df.append({'movieId': movieid, 'tags': tag_lst}, ignore_index=True)
+            df = df.append({'movieId': movie_id, 'tags': tag_lst}, ignore_index=True)
 
         combine_movie_tags = pd.merge(movie_list, df, on='movieId')
         # Enriching the movies dataset by adding the various genres columns.
@@ -58,17 +63,24 @@ class movie_recommendation_by_tags:
 
     @timer
     def read_model_content_data(self):
+        logging.debug(f'[{self.read_model_content_data.__name__}] - start of function')
         df = pd.read_csv('resources/movie_content.csv', encoding="utf-8")
-        return modeldata, df
+        return model_data, df
 
-    # Gets the top 10 similar movies based on the content
     @timer
     def get_similar_movies_based_on_tags(self, input_movie_title):
+        """
+        Matches the given movie title with the 10 most similar movies based on the content tags
+        @param input_movie_title: the movie title for the recommendation
+        @return: a collection of the 10 most similar movie titles based on tags
+        """
+        logging.debug(
+            f'[{self.get_similar_movies_based_on_tags.__name__}] - start of function with title <{input_movie_title}>')
         cosine_sim, movie_content_df_temp = self.read_model_content_data()
         # create a series of the movie id and title
-        indicies = pd.Series(movie_content_df_temp.index, movie_content_df_temp['title'])
+        indices = pd.Series(movie_content_df_temp.index, movie_content_df_temp['title'])
 
-        movie_index = indicies[input_movie_title]
+        movie_index = indices[input_movie_title]
         sim_scores = list(enumerate(cosine_sim[movie_index]))
         # Sort the movies based on the similarity scores
         sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
@@ -76,7 +88,6 @@ class movie_recommendation_by_tags:
         # Get the scores of the 5 most similar movies
         sim_scores = sim_scores[1:6]
 
-        movie_sim_scores = [i[1] for i in sim_scores]
         # Get the movie indices
         movie_indices = [i[0] for i in sim_scores]
         similar_movies = pd.DataFrame(movie_content_df_temp[['title']].iloc[movie_indices])

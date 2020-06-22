@@ -2,12 +2,16 @@ from sklearn.metrics.pairwise import linear_kernel
 import pandas as pd
 from recommendation.decorators import timer
 
+# logger to track the application process
+from recommendation.logger_config import logging
 
-class movie_recommendation_by_genre:
 
-    def data_initialization(self, movieDataset):
+class MovieRecommendationByGenre:
+
+    def data_initialization(self, movie_dataset):
+        logging.debug(f'[{self.data_initialization.__name__}] - start of function with movie dataset: {movie_dataset}')
         # reading the movies dataset
-        movie_list = pd.read_csv(movieDataset, encoding="Latin1")
+        movie_list = pd.read_csv(movie_dataset, encoding="Latin1")
 
         genre_list = ""
         for index, row in movie_list.iterrows():
@@ -29,20 +33,27 @@ class movie_recommendation_by_genre:
         movie_content_df_temp.set_index('movieId')
         movie_content_df = movie_content_df_temp.drop(columns=['movieId', 'title', 'genres'])
         movie_content_df = movie_content_df.values
-        print(movie_content_df)
+        logging.debug(f'[{self.data_initialization.__name__}] - movie content dataframe: {movie_content_df}')
 
         # Compute the cosine similarity matrix
         cosine_sim = linear_kernel(movie_content_df, movie_content_df)
 
         return cosine_sim, movie_content_df_temp
 
-    # Gets the top 10 similar movies based on the content
     @timer
     def get_similar_movies_based_on_genre(self, input_movie_title):
+        """
+        Returns a collection of similar movie titles based on the genre
+        @param input_movie_title: the reference movie title for the recommendation
+        @return: a collection of similar movies based on genre
+        """
+        logging.debug(
+            f'[{self.get_similar_movies_based_on_genre.__name__}] - '
+            f'start of function with movie title: {input_movie_title}')
         cosine_sim, movie_content_df_temp = self.data_initialization('resources/movies.csv')
         # create a series of the movie id and title
-        indicies = pd.Series(movie_content_df_temp.index, movie_content_df_temp['title'])
-        movie_index = indicies[input_movie_title]
+        indices = pd.Series(movie_content_df_temp.index, movie_content_df_temp['title'])
+        movie_index = indices[input_movie_title]
         sim_scores = list(enumerate(cosine_sim[movie_index]))
         # Sort the movies based on the similarity scores
         sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
@@ -50,7 +61,6 @@ class movie_recommendation_by_genre:
         # Get the scores of the 10 most similar movies
         sim_scores = sim_scores[1:6]
 
-        movie_sim_scores = [i[1] for i in sim_scores]
         # Get the movie indices
         movie_indices = [i[0] for i in sim_scores]
         similar_movies = pd.DataFrame(movie_content_df_temp[['title']].iloc[movie_indices])

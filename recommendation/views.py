@@ -6,8 +6,8 @@ from assignment_7.settings import MOVIELENS_ROOT
 from django.shortcuts import render
 from recommendation import recommender
 from recommendation.movie_recommendation_itemRating import movie_recommendation_itemRating
-from recommendation.movie_recommendation_by_genre import movie_recommendation_by_genre
-from recommendation.movie_recommendation_by_tags import movie_recommendation_by_tags
+from recommendation.movie_recommendation_by_genre import MovieRecommendationByGenre
+from recommendation.movie_recommendation_by_tags import MovieRecommendationByTags
 import recommendation.movie_poster as mp
 from recommendation.decorators import timer
 
@@ -76,10 +76,10 @@ def recommendation(request):
         rec_obj = movie_recommendation_itemRating()
         movies_item_rating = rec_obj.get_similar_movies_based_on_itemRating(rec_obj, selection_title)
 
-        obj_rec = movie_recommendation_by_genre()
+        obj_rec = MovieRecommendationByGenre()
         movies_genres = obj_rec.get_similar_movies_based_on_genre(selection_title)
 
-        obj = movie_recommendation_by_tags()
+        obj = MovieRecommendationByTags()
         movies_tags = obj.get_similar_movies_based_on_tags(selection_title)
 
         selection_tuple: tuple = (selection_title, mp.get_image_url(selection_title))
@@ -185,7 +185,7 @@ def get_movie_df():
 
 def _get_views_dict(movie_collection: list, movie_dict: dict) -> dict:
     logging.debug(
-        f'[{_get_views_dict.__name__}] - start to transform movie collection {movie_collection} to dictionary')
+        f'[{_get_views_dict.__name__}] - start to transform movie collection to dictionary')
     if type(movie_collection) is list:
         _get_movie_dict(movie_collection, movie_dict)
     elif type(movie_collection) is dict:
@@ -194,6 +194,12 @@ def _get_views_dict(movie_collection: list, movie_dict: dict) -> dict:
 
 
 def _df_to_movie_dict(movie_df, movie_dict: dict) -> dict:
+    """
+    Safes the title of each entry of the given movie_df in the movie_dict as key
+    @param movie_df: the src object
+    @param movie_dict: the dst object, with key = movie_title of movie_df and image url of movie title as a value
+    @return: a movie_dict with key=title, value=image_url
+    """
     temp_list: list = [movie_df[TITLE][idx] for idx in movie_df[TITLE]]
     for movie in temp_list:
         movie_dict[movie] = mp.get_image_url(movie)

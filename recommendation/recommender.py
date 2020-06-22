@@ -102,7 +102,6 @@ class Recommender:
         :param dest: destination collection
         :return: None
         """
-        logging.debug(f'[{Recommender.add_to_collection.__name__}] - start of function')
         if src is None or dest is None:
             logging.error(f'[{Recommender.add_to_collection.__name__}] - invalid parameters')
             return
@@ -121,9 +120,6 @@ class Recommender:
         :param dst_list: destination list in which the score gets saved
         :return: the destination list after calculating the score
         """
-        logging.debug(
-            f'[{Recommender.match_with_bias.__name__}] '
-            f'- start of function with src <{src_list}> and match <{match_list}>')
         score: int = 0
         for elem in src_list:
             if elem in match_list:
