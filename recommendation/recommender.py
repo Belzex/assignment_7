@@ -69,11 +69,11 @@ class Recommender:
                         Recommender.add_to_collection(imdb[GENRES_COL], genres)
 
                     if MOVIELENS in data:
-                        movielensNode = data[MOVIELENS]
-                        Recommender.add_to_collection(movielensNode[DIRECTORS_COL], directors)
-                        Recommender.add_to_collection(movielensNode[LANGUAGES_COL], languages)
-                        Recommender.add_to_collection(movielensNode[ACTORS_COL], actors)
-                        Recommender.add_to_collection(movielensNode[GENRES_COL], genres)
+                        movielens_node = data[MOVIELENS]
+                        Recommender.add_to_collection(movielens_node[DIRECTORS_COL], directors)
+                        Recommender.add_to_collection(movielens_node[LANGUAGES_COL], languages)
+                        Recommender.add_to_collection(movielens_node[ACTORS_COL], actors)
+                        Recommender.add_to_collection(movielens_node[GENRES_COL], genres)
                     if TMDB_COL in data:
                         tmdb = data[TMDB_COL]
                         for actor in tmdb[CREDITS_COL][CAST]:
@@ -91,7 +91,7 @@ class Recommender:
                                                           ACTORS_COL: actors, GENRES_COL: genres,
                                                           KEYWORDS_COL: keywords}
             except FileNotFoundError:
-                logging.error(f'No metadata for movie id <{str(row[MOVIE_ID])}>')
+                logging.error(f'[init] - No metadata for movie id <{str(row[MOVIE_ID])}>')
 
     @staticmethod
     def add_to_collection(src, dest):
