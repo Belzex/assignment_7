@@ -79,6 +79,11 @@ def _title_to_image_url(movie_title: str, comma_check: bool = False) -> str:
 
 
 def _remove_year_from_title(movie_title: str) -> str:
+    """
+    Removes the release year of the movie title given as parameter
+    @param movie_title: the movie title, which will be modified
+    @return: the movie title without the release year
+    """
     logging.debug(f'[{_remove_year_from_title.__name__}] - start of function')
     year_regex = re.compile(YEAR_PATTERN)
     return_string: str = year_regex.subn('', movie_title)[0]
