@@ -4,7 +4,11 @@ import json
 from math import inf
 
 from recommendation import similarity_measures as sm
+# used for time measurement of functions
 from recommendation.decorators import timer
+
+# logger to track the application process
+from recommendation.logger_config import logging
 
 MOVIE_ID: str = 'movieId'
 USER_ID: str = 'userId'
@@ -55,21 +59,21 @@ class Recommender:
                     keywords = set()
                     if IMDB_COL in data:
                         imdb = data[IMDB_COL]
-                        Recommender.addToCollection(imdb[DIRECTORS_COL], directors)
+                        Recommender.add_to_collection(imdb[DIRECTORS_COL], directors)
                         languages.add(imdb['originalLanguage'])
                         actor_str = imdb[ACTORS_COL]
                         actor_str = str(actor_str).replace("['Stars: ", "")
                         actor_str = str(actor_str).replace(" | See full cast and crew »']", "")
                         for actor in str(actor_str).split(", "):
                             actors.add(actor)
-                        Recommender.addToCollection(imdb[GENRES_COL], genres)
+                        Recommender.add_to_collection(imdb[GENRES_COL], genres)
 
                     if MOVIELENS in data:
                         movielensNode = data[MOVIELENS]
-                        Recommender.addToCollection(movielensNode[DIRECTORS_COL], directors)
-                        Recommender.addToCollection(movielensNode[LANGUAGES_COL], languages)
-                        Recommender.addToCollection(movielensNode[ACTORS_COL], actors)
-                        Recommender.addToCollection(movielensNode[GENRES_COL], genres)
+                        Recommender.add_to_collection(movielensNode[DIRECTORS_COL], directors)
+                        Recommender.add_to_collection(movielensNode[LANGUAGES_COL], languages)
+                        Recommender.add_to_collection(movielensNode[ACTORS_COL], actors)
+                        Recommender.add_to_collection(movielensNode[GENRES_COL], genres)
                     if TMDB_COL in data:
                         tmdb = data[TMDB_COL]
                         for actor in tmdb[CREDITS_COL][CAST]:
@@ -87,10 +91,10 @@ class Recommender:
                                                           ACTORS_COL: actors, GENRES_COL: genres,
                                                           KEYWORDS_COL: keywords}
             except FileNotFoundError:
-                print('no metadata for movie ' + str(row[MOVIE_ID]))
+                logging.error(f'No metadata for movie id <{str(row[MOVIE_ID])}>')
 
     @staticmethod
-    def addToCollection(src, dest):
+    def add_to_collection(src, dest):
         """
         Adds the source collection to the destination collection. Needed in cases, where the iterable object is
         neither hashable nor of NonType
@@ -98,152 +102,161 @@ class Recommender:
         :param dest: destination collection
         :return: None
         """
+        logging.debug(f'[{Recommender.add_to_collection.__name__}] - start of function')
         if src is None or dest is None:
+            logging.error(f'[{Recommender.add_to_collection.__name__}] - invalid parameters')
             return
         for elem in src:
             dest.add(elem)
 
     @staticmethod
-    def matchWithBias(srcList: list = list(), matchList: list = list(), bias: int = 1, negBias: int = 1,
-                      dstList: list = list()) -> list:
+    def match_with_bias(src_list: list = list(), match_list: list = list(), bias: int = 1, negative_bias: int = 1,
+                        dst_list: list = list()) -> list:
         """
         Adds a score value to the destination list given in parameter
-        :param srcList: source list of elements, which will be matched against the matchList
-        :param matchList: match list for determining the bias
+        :param src_list: source list of elements, which will be matched against the matchList
+        :param match_list: match list for determining the bias
         :param bias: positive bias is applied if an source list element is found in the match list
-        :param negBias: negative bias is applied if an source list element is found in the match list
-        :param dstList: destination list in which the score gets saved
-        :return: the destiniation list after calculating the score
+        :param negative_bias: negative bias is applied if an source list element is found in the match list
+        :param dst_list: destination list in which the score gets saved
+        :return: the destination list after calculating the score
         """
+        logging.debug(
+            f'[{Recommender.match_with_bias.__name__}] '
+            f'- start of function with src <{src_list}> and match <{match_list}>')
         score: int = 0
-        for elem in srcList:
-            if elem in matchList:
+        for elem in src_list:
+            if elem in match_list:
                 score += bias
             else:
-                score -= negBias
-        dstList.append(score)
-        return dstList
+                score -= negative_bias
+        dst_list.append(score)
+        return dst_list
 
     @staticmethod
-    def addScoreToList(metaData, bias: int, dstList: list):
+    def add_score_to_list(meta_data, bias: int, dst_list: list):
         score: int = 0
-        for _ in metaData:
+        for _ in meta_data:
             score += bias
-        dstList.append(score)
+        dst_list.append(score)
 
-    def generalMetadataRecommender(self, movieId: int, bias: int = 15, negBias: int = 1):
+    def general_metadata_recommender(self, movie_id: int, bias: int = 15, negative_bias: int = 1):
         """
-        general Metadata recommender based on genres, language, actors, directors and keywords with multiple similarity measures
-        :param movieId: the id of the movie
+        general Metadata recommender based on genres, language, actors, directors and keywords with multiple similarity
+        measures
+        :param movie_id: the id of the movie
         :param bias: the scoring bias
-        :param negBias: the negative scoring bias
+        :param negative_bias: the negative scoring bias
         :return: 5 lists of movie ids, they may be [], maximum length of each list is 5
         """
-        genres: list = self.movie_metadata[movieId][GENRES_COL]
-        languages: list = self.movie_metadata[movieId][LANGUAGES_COL]
-        actors: list = self.movie_metadata[movieId][ACTORS_COL]
-        directors: list = self.movie_metadata[movieId][DIRECTORS_COL]
+        genres = self.movie_metadata[movie_id][GENRES_COL]
+        languages = self.movie_metadata[movie_id][LANGUAGES_COL]
+        actors = self.movie_metadata[movie_id][ACTORS_COL]
+        directors = self.movie_metadata[movie_id][DIRECTORS_COL]
 
-        movieScoresRef: list = list()
+        movie_scores_ref: list = list()
 
-        Recommender.addScoreToList(genres, bias, movieScoresRef)
-        Recommender.addScoreToList(languages, bias, movieScoresRef)
-        Recommender.addScoreToList(actors, bias, movieScoresRef)
-        Recommender.addScoreToList(directors, bias, movieScoresRef)
+        Recommender.add_score_to_list(genres, bias, movie_scores_ref)
+        Recommender.add_score_to_list(languages, bias, movie_scores_ref)
+        Recommender.add_score_to_list(actors, bias, movie_scores_ref)
+        Recommender.add_score_to_list(directors, bias, movie_scores_ref)
 
-        moviePointsManhattan: dict = dict()
-        moviePointsEuclidean: dict = dict()
-        moviePointsChebyshev: dict = dict()
-        moviePointsCosine: dict = dict()
-        moviePointsJaccard: dict = dict()
+        movie_points_manhattan: dict = dict()
+        movie_points_euclidean: dict = dict()
+        movie_points_chebyshev: dict = dict()
+        movie_points_cosine: dict = dict()
+        movie_points_jaccard: dict = dict()
 
         for key, movie in self.movie_metadata.items():
-            if key == movieId:
+            if key == movie_id:
                 continue
 
-            movieScores = list()
-            Recommender.matchWithBias(movie[GENRES_COL], genres, bias, negBias, movieScores)
-            Recommender.matchWithBias(movie[LANGUAGES_COL], languages, bias, negBias, movieScores)
-            Recommender.matchWithBias(movie[ACTORS_COL], actors, bias, negBias, movieScores)
-            Recommender.matchWithBias(movie[DIRECTORS_COL], directors, bias, negBias, movieScores)
+            movie_scores = list()
+            Recommender.match_with_bias(movie[GENRES_COL], genres, bias, negative_bias, movie_scores)
+            Recommender.match_with_bias(movie[LANGUAGES_COL], languages, bias, negative_bias, movie_scores)
+            Recommender.match_with_bias(movie[ACTORS_COL], actors, bias, negative_bias, movie_scores)
+            Recommender.match_with_bias(movie[DIRECTORS_COL], directors, bias, negative_bias, movie_scores)
 
-            moviePointsManhattan[key] = float(sm.minkowski_distance(movieScoresRef, movieScores, 1))
-            moviePointsEuclidean[key] = float(sm.minkowski_distance(movieScoresRef, movieScores, 2))
-            moviePointsChebyshev[key] = float(sm.minkowski_distance(movieScoresRef, movieScores, inf))
-            moviePointsCosine[key] = float(sm.cosine_similarity(movieScoresRef, movieScores))
-            moviePointsJaccard[key] = float(sm.jaccard_similarity(movieScoresRef, movieScores))
+            movie_points_manhattan[key] = float(sm.minkowski_distance(movie_scores_ref, movie_scores, 1))
+            movie_points_euclidean[key] = float(sm.minkowski_distance(movie_scores_ref, movie_scores, 2))
+            movie_points_chebyshev[key] = float(sm.minkowski_distance(movie_scores_ref, movie_scores, inf))
+            movie_points_cosine[key] = float(sm.cosine_similarity(movie_scores_ref, movie_scores))
+            movie_points_jaccard[key] = float(sm.jaccard_similarity(movie_scores_ref, movie_scores))
 
-        list1 = sorted(moviePointsManhattan, key=lambda x: moviePointsManhattan[x], reverse=False)
-        list2 = sorted(moviePointsEuclidean, key=lambda x: moviePointsEuclidean[x], reverse=False)
-        list3 = sorted(moviePointsChebyshev, key=lambda x: moviePointsChebyshev[x], reverse=False)
-        list4 = sorted(moviePointsCosine, key=lambda x: moviePointsCosine[x], reverse=True)
-        list5 = sorted(moviePointsJaccard, key=lambda x: moviePointsJaccard[x], reverse=True)
+        list1 = sorted(movie_points_manhattan, key=lambda x: movie_points_manhattan[x], reverse=False)
+        list2 = sorted(movie_points_euclidean, key=lambda x: movie_points_euclidean[x], reverse=False)
+        list3 = sorted(movie_points_chebyshev, key=lambda x: movie_points_chebyshev[x], reverse=False)
+        list4 = sorted(movie_points_cosine, key=lambda x: movie_points_cosine[x], reverse=True)
+        list5 = sorted(movie_points_jaccard, key=lambda x: movie_points_jaccard[x], reverse=True)
         return list1[:5], list2[:5], list3[:5], list4[:5], list5[:5]
 
     @timer
-    def metadataRecommender(self, movieId: int, bias=15):
+    def metadata_recommender(self, movie_id: int, bias=15):
         """
         Metadata recommender based on genres, language, actors, directors and keywords
-        :param movieId: the id of the movie
+        :param movie_id: the id of the movie
         :param bias: the scoring bias
         :return: list of movie ids, may be [], maximum length is 5
         """
-        if movieId not in self.movie_metadata:
+        logging.debug(f'[{self.metadata_recommender.__name__}] - start function with movie id: {movie_id}')
+        if movie_id not in self.movie_metadata:
             return []
-        genres = self.movie_metadata[movieId]['genres']
-        languages = self.movie_metadata[movieId]['languages']
-        actors = self.movie_metadata[movieId]['actors']
-        directors = self.movie_metadata[movieId]['directors']
-        keywords = self.movie_metadata[movieId]['keywords']
+        genres = self.movie_metadata[movie_id][GENRES_COL]
+        languages = self.movie_metadata[movie_id][LANGUAGES_COL]
+        actors = self.movie_metadata[movie_id][ACTORS_COL]
+        directors = self.movie_metadata[movie_id][DIRECTORS_COL]
+        keywords = self.movie_metadata[movie_id][KEYWORDS_COL]
 
-        movieScoresRef = list()
-        Recommender.addScoreToList(genres, bias, movieScoresRef)
-        Recommender.addScoreToList(languages, bias, movieScoresRef)
-        Recommender.addScoreToList(actors, bias, movieScoresRef)
-        Recommender.addScoreToList(directors, bias, movieScoresRef)
-        Recommender.addScoreToList(keywords, bias, movieScoresRef)
+        movie_scores_ref = list()
+        Recommender.add_score_to_list(genres, bias, movie_scores_ref)
+        Recommender.add_score_to_list(languages, bias, movie_scores_ref)
+        Recommender.add_score_to_list(actors, bias, movie_scores_ref)
+        Recommender.add_score_to_list(directors, bias, movie_scores_ref)
+        Recommender.add_score_to_list(keywords, bias, movie_scores_ref)
 
-        moviePointsCosine = dict()
+        movie_points_cosine = dict()
 
         for key, movie in self.movie_metadata.items():
-            if key == movieId:
+            if key == movie_id:
                 continue
-            movieScores = list()
-            Recommender.matchWithBias(movie[GENRES_COL], genres, bias, 1, movieScores)
-            Recommender.matchWithBias(movie[LANGUAGES_COL], languages, bias, 1, movieScores)
-            Recommender.matchWithBias(movie[ACTORS_COL], actors, bias, 1, movieScores)
-            Recommender.matchWithBias(movie[DIRECTORS_COL], directors, bias, 1, movieScores)
-            Recommender.matchWithBias(movie[KEYWORDS_COL], keywords, bias, 1, movieScores)
+            movie_scores = list()
+            Recommender.match_with_bias(movie[GENRES_COL], genres, bias, 1, movie_scores)
+            Recommender.match_with_bias(movie[LANGUAGES_COL], languages, bias, 1, movie_scores)
+            Recommender.match_with_bias(movie[ACTORS_COL], actors, bias, 1, movie_scores)
+            Recommender.match_with_bias(movie[DIRECTORS_COL], directors, bias, 1, movie_scores)
+            Recommender.match_with_bias(movie[KEYWORDS_COL], keywords, bias, 1, movie_scores)
 
-            moviePointsCosine[key] = float(sm.cosine_similarity(movieScoresRef, movieScores))
-        recommendation = sorted(moviePointsCosine, key=lambda x: moviePointsCosine[x], reverse=True)
+            movie_points_cosine[key] = float(sm.cosine_similarity(movie_scores_ref, movie_scores))
+        recommendation = sorted(movie_points_cosine, key=lambda x: movie_points_cosine[x], reverse=True)
         return recommendation[:5]
 
     @timer
-    def metadataRecommenderKeywords(self, movieId):
+    def metadata_recommender_with_keywords(self, movie_id):
         """
         Metadata recommender based on keywords and genres
-        :param movieId: the id of the movie
+        :param movie_id: the id of the movie
         :return: list of movie ids, may be [], maximum length is 5
         """
-        if movieId not in self.movie_metadata:
+        logging.debug(
+            f'[{self.metadata_recommender_with_keywords.__name__}] - start function with movie id: {movie_id}')
+        if movie_id not in self.movie_metadata:
             return []
-        genres = self.movie_metadata[movieId]['genres']
-        keywords = self.movie_metadata[movieId]['keywords']
+        genres = self.movie_metadata[movie_id][GENRES_COL]
+        keywords = self.movie_metadata[movie_id][KEYWORDS_COL]
 
-        movieScoresRef = list()
-        Recommender.addScoreToList(genres, 2, movieScoresRef)
-        Recommender.addScoreToList(keywords, 10, movieScoresRef)
+        movie_scores_ref = list()
+        Recommender.add_score_to_list(genres, 2, movie_scores_ref)
+        Recommender.add_score_to_list(keywords, 10, movie_scores_ref)
 
-        moviePointsJaccard = dict()
+        movie_points_jaccard = dict()
 
         for key, movie in self.movie_metadata.items():
-            if key == movieId:
+            if key == movie_id:
                 continue
-            movieScores = list()
-            Recommender.matchWithBias(movie[GENRES_COL], genres, 2, 0, movieScores)
-            Recommender.matchWithBias(movie[KEYWORDS_COL], keywords, 10, 5, movieScores)
+            movie_scores = list()
+            Recommender.match_with_bias(movie[GENRES_COL], genres, 2, 0, movie_scores)
+            Recommender.match_with_bias(movie[KEYWORDS_COL], keywords, 10, 5, movie_scores)
 
-            moviePointsJaccard[key] = float(sm.jaccard_similarity(movieScoresRef, movieScores))
-        recommendation = sorted(moviePointsJaccard, key=lambda x: moviePointsJaccard[x], reverse=True)
+            movie_points_jaccard[key] = float(sm.jaccard_similarity(movie_scores_ref, movie_scores))
+        recommendation = sorted(movie_points_jaccard, key=lambda x: movie_points_jaccard[x], reverse=True)
         return recommendation[:5]

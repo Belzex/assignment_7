@@ -16,7 +16,6 @@ YEAR_PATTERN: str = ' \(....\)';
 API_KEY_PREFIX: list = ['http://omdbapi.com/?apikey=56197bb3&t=', 'http://omdbapi.com/?apikey=f32e08d6&t=']
 
 
-@timer
 def get_image_url(movie_title: str) -> str:
     """
     @param movie_title: the movie title for which an image url will be retrieved from OMDb
